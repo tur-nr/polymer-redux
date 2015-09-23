@@ -1,0 +1,31 @@
+{
+  "name": "polymer-redux",
+  "version": "0.0.0",
+  "description": "Redux as a Polymer component.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tur-nr/polymer-redux.git"
+  },
+  "keywords": [
+    "redux",
+    "polymer",
+    "web",
+    "component",
+    "reducer"
+  ],
+  "author": "Christopher Turner <turner296@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tur-nr/polymer-redux/issues"
+  },
+  "homepage": "https://github.com/tur-nr/polymer-redux#readme",
+  "devDependencies": {
+    "bower": "^1.5.2",
+    "redux": "^3.0.0",
+    "vulcanize": "^1.10.4"
+  }
+}
