@@ -1,0 +1,69 @@
+<script src="./node_modules/redux/dist/redux.js"></script>
+<script>
+    (function() {
+        var warning = 'Polymer Redux: <%s>.%s has "notify" enabled, two-way bindings goes against redux\'s paradigm.';
+
+        Redux.Polymer = function(store) {
+            var createListener = function(element, props) {
+                return function() {
+                    var state = store.getState();
+                    props.forEach(function(property) {
+                        this[property.name] = Polymer.Base.get(property.path, state);
+                    }, element);
+                }
+            }
+
+            return {
+                ready: function() {
+                    var props = [];
+                    var tag = this.constructor.name;
+                    var actions;
+                    var listener;
+
+                    // property bindings
+                    for (var name in this.properties) {
+                        if (this.properties.hasOwnProperty(name)) {
+                            if (this.properties[name].statePath) {
+                                // notify flag, warn against two-way bindings
+                                if (this.properties[name].notify) {
+                                    console.warn(warning, tag, name);
+                                }
+                                props.push({
+                                    name: name,
+                                    path: this.properties[name].statePath
+                                });
+                            }
+                        }
+                    }
+
+                    // subscribe properties to state change
+                    if (props.length) {
+                        listener = createListener(this, props);
+                        store.subscribe(listener);
+                        listener(); // starts state binding
+                    }
+
+                    // bind actions to store dispatch
+                    if (this.actions) {
+                        actions = {}
+                        // bind action context
+                        for (var action in this.actions) {
+                            actions[action] = this.actions[action].bind(this);
+                        }
+                        this._actions = Redux.bindActionCreators(actions, store.dispatch);
+                    }
+                },
+                dispatch: function(action) {
+                    var tag, args;
+                    if (this._actions == null || typeof this._actions[action] !== 'function') {
+                        tag = this.constructor.name;
+                        throw new TypeError('Polymer Redux: <' + tag + '> has no action "' + action + '"');
+                    }
+                    args = Array.prototype.slice.call(arguments, 1);
+
+                    return this._actions[action].apply(undefined, args);
+                }
+            };
+        };
+    })();
+</script>
