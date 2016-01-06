@@ -48,7 +48,9 @@
                         actions = {}
                         // bind action context
                         for (var action in this.actions) {
-                            actions[action] = this.actions[action].bind(this);
+                            if (this.actions.hasOwnProperty(action) {
+                                actions[action] = this.actions[action].bind(this);
+                            }
                         }
                         this._actions = Redux.bindActionCreators(actions, store.dispatch);
                     }
