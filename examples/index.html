@@ -2,8 +2,10 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <script src="./bower_components/webcomponentsjs/webcomponents.js"></script>
-        <link rel="import" href="./redux.html">
+        <script src="../bower_components/webcomponentsjs/webcomponents.js"></script>
+        <script src="../node_modules/redux/dist/redux.js"></script>
+        <link rel="import" href="../bower_components/polymer/polymer.html">
+        <link rel="import" href="../polymer-redux.html">
     </head>
     <body>
         <dom-module id="demo-hello">
@@ -21,7 +23,7 @@
                         return { name: 'James Bond' };
                 }
             });
-            var ReduxBehavior = Redux.Polymer(store);
+            var ReduxBehavior = PolymerRedux(store);
             Polymer({
                 is: 'demo-hello',
                 behaviors: [ ReduxBehavior ],
