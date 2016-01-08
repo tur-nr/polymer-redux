@@ -74,6 +74,9 @@
                 }
 
                 throw new TypeError('Polymer Redux: <' + tag + '>.dispatch must be given an action name, function or native redux action object');
+            },
+            getState: function() {
+                return store.getState();
             }
         };
     };
