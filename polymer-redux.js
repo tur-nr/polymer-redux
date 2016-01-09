@@ -23,7 +23,7 @@
             ready: function() {
                 var props = [];
                 var tag = this.constructor.name;
-                var actions;
+                var fire = this.fire.bind(this);
                 var listener;
 
                 // property bindings
@@ -45,7 +45,10 @@
                 // subscribe properties to state change
                 if (props.length) {
                     listener = createListener(this, props);
-                    store.subscribe(listener);
+                    store.subscribe(function() {
+                      listener();
+                      fire('state-changed', store.getState());
+                    });
                     listener(); // starts state binding
                 }
             },
