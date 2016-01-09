@@ -25,7 +25,6 @@
   "homepage": "https://github.com/tur-nr/polymer-redux#readme",
   "devDependencies": {
     "bower": "^1.5.2",
-    "redux": "^3.0.5",
-    "vulcanize": "^1.14.0"
+    "redux": "^3.0.5"
   }
 }
