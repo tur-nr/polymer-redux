@@ -25,6 +25,7 @@ document.
 ```html
 <html>
     <head>
+    	<link rel="import" href="./bower_components/polymer/polymer.html">
         <script src="./bower_components/webcomponentsjs/webcomponents.js"></script>
         <script src="./node_modules/redux/dist/redux.js"></script>
         <script src="./bower_components/polymer-redux/polymer-redux.js"></script>        
@@ -43,20 +44,41 @@ your Redux store as usual and then create the behavior with the `PolymerRedux`
 constructor passing the store.
 
 ```javascript
-var store = Redux.createStore(function(state, action) {
-    return state;
-});
-var ReduxBehavior = new PolymerRedux(store);
-var MyElement = Polymer({
-    is: 'my-element',
-    behaviors: [ ReduxBehavior ],
-    created: function() {
-        var state = this.getState();
+initialState = {customer: {age: 30, name: 'Polymer Redux'}}
+store = Redux.createStore(appReducer)
+var ReduxBehavior = PolymerRedux(store)
+
+function appReducer(state, action) {
+    state = state || initialState
+    var customer =
+    {
+        name: nameReducer(state.customer.name, action),
+        age: ageReducer(state.customer.age, action)
     }
-});
+    return {customer: customer}
+}
+
+function nameReducer(state, action) {
+    switch (action.type) {
+        case 'update':
+            return action.value || state
+        default:
+            return state;
+    }
+}
+
+function ageReducer(state, action) {
+    switch(action.type) {
+        case 'increase':
+            return state + 1
+        case 'decrease':
+            return state - 1
+        default:
+            return state
+    }
+}
 ```
-Now `MyElement` has a connection to the Redux store and can bind properties to
-it's state and dispatch actions.
+
 
 ### Binding Properties
 
@@ -66,23 +88,21 @@ the `created` callback. To bind a property to a value in the state set the
 
 ```javascript
 Polymer({
-    is: 'my-element',
+    is: 'show-simplecustomer',
     behaviors: [ ReduxBehavior ],
     properties: {
         message: {
-            type: String,
-            statePath: 'message'
+            type: Object,
+            statePath: 'customer'
         }
     }
 });
 ```
 
-`<MyElement>.message` is now bound to the value of `message` in the state.
-Whenever the store state changes so to will the properties of the element.
 
 #### Dot Notation
 
-Binding properties this way makes use of [`Polymer.Base.get()`](http://polymer.github.io/polymer/) method, so you can use dot notation paths like so: `'user.firstName'`.
+Binding properties this way makes use of [`Polymer.Base.get()`](http://polymer.github.io/polymer/) method, so you can use dot notation paths like so: `'customer.name'`.
 
 #### Two-way Bindings
 
@@ -93,41 +113,78 @@ binding via the `notify` flag. If the properties flagged with `notify` and have
 
 ### Dispatching Actions
 
-For an easier and semanatic way to dispatch actions against the store, is to create a list of actions the component can trigger. Adding a list of functions to the `actions` property, exposes them to the `dispatch()` method of the element.
+For an easier and semanatic way to dispatch actions against the store, is to create a list of actions the component can trigger. Adding a list of functions to the `actions` property, exposes them to the `dispatch()` method of the element. Or you can just simply `dispatch` an action object with `type` name.
+
+```html
+<dom-module id="show-customer">
+    <template>
+        <h1>Hello, <span>[[customer.name]]</span></h1>
+        <h2>Age: <span>[[customer.age]]</span></h2>
+        <div>
+            <button id="increaseButton">+</button>
+            <button id="decreaseButton">-</button>
+        </div>
+        <br/>
+        <input id="nameTextField" placeHolder="new name"></input>
+        <button id="updateButton">update</button>
+    </template>
+</dom-module>
+```
 
 ```javascript
 Polymer({
-    actions: {
-        setName: function(first, last) {
-            return {
-                type: 'SET_NAME',
-                first: first,
-                last: last
-            };
+    is: 'show-customer',
+    behaviors: [ ReduxBehavior ],
+    properties: {
+        customer: {
+            type: Object,
+            statePath: 'customer'
         }
     },
-    handleClick: function() {
-        return this.dispatch('setName', 'James', 'Bond');
+    listeners: {
+        'increaseButton.click': '_handleIncrease',
+        'decreaseButton.click': '_handleDecrease',
+        'updateButton.click': '_handleUpdate',
+        'nameTextField.keypress': '_handleKeypress'
+    },
+    _handleIncrease: function() {
+        this.dispatch({type: 'increase'})
+    },
+    _handleDecrease: function() {
+        this.dispatch({type: 'decrease'})
+    },
+    _handleUpdate: function() {
+        this.dispatch({type: 'update', value: this.$.nameTextField.value})
+        this.$.nameTextField.value = ''
+    },
+    _handleKeypress: function(e) {
+        if(e.which === 13 && !!e.currentTarget.value.trim()) {
+            this._handleUpdate();
+        }
     }
 });
 ```
 
-`dispatch()` also takes a function that returns a action object, or the standard redux way.
+`dispatch()` also takes a function that returns a action object.
 
 ```javascript
 Polymer({
+//...
     handleClick: function() {
         this.dispatch(function() {
             return {
                type: 'ACTION'
             };
         });
-        // or
-        this.dispatch({
-            type: 'ACTION'
-        });
     }
 });
+```
+
+### Make it Work
+Just simply declare the custom `Polymer` element as below.
+
+```html
+<show-customer></show-customer>
 ```
 
 ## API
