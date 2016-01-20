@@ -12,7 +12,7 @@ with Polymer to be more focused on functionality than the applications state.
 ## Installation
 
 ```bash
-bower install --save tur-nr/polymer-redux
+bower install --save polymer-redux
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ document.
     <head>
         <script src="./bower_components/webcomponentsjs/webcomponents.js"></script>
         <script src="./node_modules/redux/dist/redux.js"></script>
-        <link rel="import" href="./bower_component/polymer-redux/polymer-redux.html">
+        <script src="./bower_components/polymer-redux/polymer-redux.js"></script>        
     </head>
     <body>
         <!-- app -->
@@ -93,7 +93,7 @@ binding via the `notify` flag. If the properties flagged with `notify` and have
 
 ### Dispatching Actions
 
-For an easier and semanatic way to dispatch actions against the store, is to create a list of actions the component can trigger. Adding a list of functions to the `actions` property, exoses them to the `dispatch()` method of the element.
+For an easier and semanatic way to dispatch actions against the store, is to create a list of actions the component can trigger. Adding a list of functions to the `actions` property, exposes them to the `dispatch()` method of the element.
 
 ```javascript
 Polymer({
@@ -179,5 +179,3 @@ Fires when the store's state has changed.
 ## License
 
 [MIT](LICENSE)
-
-Copyright (c) 2016 [Christopher Turner](https://github.com/tur-nr)

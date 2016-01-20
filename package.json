@@ -1,6 +1,6 @@
 {
   "name": "polymer-redux",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Polymer bindings for Redux.",
   "main": "polymer-redux.js",
   "scripts": {
@@ -17,12 +17,12 @@
     "component",
     "reducer"
   ],
-  "author": "Christopher Turner <turner296@gmail.com>",
+  "author": "Steven Zhang <jdomzhang@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tur-nr/polymer-redux/issues"
+    "url": "https://github.com/jdomzhang/polymer-redux/issues"
   },
-  "homepage": "https://github.com/tur-nr/polymer-redux#readme",
+  "homepage": "https://github.com/jdomzhang/polymer-redux#readme",
   "devDependencies": {
     "bower": "^1.5.2",
     "redux": "^3.0.5"
