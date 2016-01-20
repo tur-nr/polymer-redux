@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="../bower_components/webcomponentsjs/webcomponents.js"></script>
+        <script src="../node_modules/redux/dist/redux.js"></script>
+        <link rel="import" href="../bower_components/polymer/polymer.html">
+        <link rel="import" href="../polymer-redux.html">
+    </head>
+    <body>
+        <script>
+
+            initialState = {customer: {age: 30, name: 'no name'}}
+            store = Redux.createStore(appReducer);
+
+            function appReducer(state, action) {
+                state = state || initialState
+                var customer =
+                {
+                    name: nameReducer(state.customer.name, action),
+                    age: ageReducer(state.customer.age, action)
+                }
+
+                return {customer: customer}
+            }
+
+            function nameReducer(state, action) {
+                switch (action.type) {
+                    case 'update':
+                        return action.value || state;
+                    default:
+                        return state;
+                }
+            }
+
+            function ageReducer(state, action) {
+                switch(action.type) {
+                    case 'increase':
+                        return state + 1;
+                    case 'decrease':
+                        return state - 1;
+                    default:
+                        return state;
+                }
+            }
+
+            var ReduxBehavior = PolymerRedux(store);
+        </script>
+        
+
+        <dom-module id="update-customer">
+            <template>
+                <input id="nameTextField" value=[[name]]>
+                <button id="updateButton">update</button>
+            </template>
+        </dom-module>
+
+        <dom-module id="show-customer">
+            <template>
+                <h1>Hello, <span>[[customer.name]]</span> (<span>[[customer.age]]</span>)</h1>
+            </template>
+        </dom-module>
+
+        <script>
+            Polymer({
+                is: 'show-customer',
+                behaviors: [ ReduxBehavior ],
+                properties: {
+                    customer: {
+                        type: Object,
+                        statePath: 'customer'
+                    }
+                },
+            });
+
+            Polymer({
+                is: 'update-age',
+                extends: 'button',
+                behaviors: [ ReduxBehavior ],
+                properties: {
+                    actionType: String
+                },
+                actions: {
+                    doSomething: function(type) {
+                        return { type: type };
+                    }
+                },
+                listeners: {
+                    'click': '_handleClick'
+                },
+                _handleClick: function() {
+                    this.dispatch('doSomething', this.actionType);
+                }
+            });
+
+            Polymer({
+                is: 'update-customer',
+                behaviors: [ ReduxBehavior ],
+                properties: {
+                    name: {
+                        type: String,
+                        statePath: 'customer.name'
+                    }
+                },
+                actions: {
+                    doSomething: function(type) {
+                        return { type: type, value: this.$.nameTextField.value };
+                    }
+                },
+                listeners: {
+                    'updateButton.click': '_handleClick'
+                },
+                _handleClick: function() {
+                    this.dispatch('doSomething', 'update');
+                }
+            });
+
+
+        </script>
+
+        
+        
+        <h2> Customer Panel 1</h2>
+        <show-customer id="eleShow1"></show-customer>
+        <hr/>
+
+        <h2> Age </h2>
+        <button is="update-age" action-type="increase">+</button>
+        <button is="update-age" action-type="decrease">-</button>
+        
+        <hr/>
+        <h2> Customer Panel 2</h2>
+        <show-customer id="eleShow1"></show-customer>
+        
+        <hr/>
+        <update-customer id="eleUpdate"></update-customer>
+    </body>
+</html>
