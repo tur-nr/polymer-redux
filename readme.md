@@ -115,6 +115,8 @@ binding via the `notify` flag. If the properties flagged with `notify` and have
 
 For an easier and semanatic way to dispatch actions against the store, is to create a list of actions the component can trigger. Adding a list of functions to the `actions` property, exposes them to the `dispatch()` method of the element. Or you can just simply `dispatch` an action object with `type` name.
 
+Add 2 buttons to increase/decrease the `customer.age`, and add one input field and button to update `customer.name`.
+
 ```html
 <dom-module id="show-customer">
     <template>
@@ -130,6 +132,8 @@ For an easier and semanatic way to dispatch actions against the store, is to cre
     </template>
 </dom-module>
 ```
+
+Add event handlers for buttons and input field.
 
 ```javascript
 Polymer({
