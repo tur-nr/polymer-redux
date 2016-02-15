@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tur-nr/polymer-redux.git"
+    "url": "git+https://github.com/jdomzhang/polymer-redux.git"
   },
   "keywords": [
     "redux",
