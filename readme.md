@@ -84,6 +84,40 @@ Whenever the store state changes so to will the properties of the element.
 
 Binding properties this way makes use of [`Polymer.Base.get()`](http://polymer.github.io/polymer/) method, so you can use dot notation paths like so: `'user.firstName'`.
 
+
+#### Dynamic Bindings
+
+There are cases, when a static `statePath` can't be provided when defining properties in a Polymer element. 
+
+Take for example this state tree: 
+
+```javascript
+{
+    todoToEdit: 1,
+    todosById:  {
+        1: {'checked': false,'text': 'some text'},
+        2: {'checked': true, 'text': 'some other text'},
+        3: ....
+    }
+}
+```
+
+To create a Polymer element that allows you to edit a todo from the `todosById` object based on a key/id stored in the `todoToEdit` property, the binding has to be dynamic.  
+To allow these use cases the `statePath` can also take a `Function` instead of a `String`. The function will be called and the `state` will be passed into it as a parameter: 
+ 
+```javascript
+Polymer({
+    is: 'my-element',
+    behaviors: [ ReduxBehavior ],
+    properties: {
+        todo: {
+            type: String,
+            statePath: function(state) { return state.todosById[state.todoToEdit] }
+        }
+    }
+});
+```    
+
 #### Two-way Bindings
 
 Principle #2 of Redux's [Three Principles](http://redux.js.org/docs/introduction/ThreePrinciples.html),
