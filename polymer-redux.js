@@ -14,7 +14,12 @@
             return function() {
                 var state = store.getState();
                 props.forEach(function(property) {
-                    this[property.name] = Polymer.Base.get(property.path, state);
+                    if (typeof property.path == 'function') {
+                        this[property.name] = property.path.call(this,state);
+                    }
+                    else {
+                        this[property.name] = Polymer.Base.get(property.path, state);
+                    }
                 }, element);
             }
         }
