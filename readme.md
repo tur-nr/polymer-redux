@@ -83,7 +83,7 @@ function ageReducer(state, action) {
 ### Binding Properties
 
 Polymer Redux binds state to the components properties. This binding happens on
-the `created` callback. To bind a property to a value in the state set the 
+the `created` callback. To bind a property to a value in the state set the
 `statePath` key when defining properties in Polymer.
 
 ```javascript
@@ -240,3 +240,5 @@ Fires when the store's state has changed.
 ## License
 
 [MIT](LICENSE)
+
+Copyright (c) 2016 [Christopher Turner](https://github.com/tur-nr)
