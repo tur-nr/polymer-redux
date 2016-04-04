@@ -71,17 +71,13 @@
                     return store.dispatch(this.actions[name].apply(this, args));
                 }
 
-                // function
-                if (typeof args[0] === 'function') {
+                // action creator
+                if (typeof args[0] === 'function' && args[0].length === 0) {
                     return store.dispatch(args[0]());
                 }
 
-                // object
-                if (args[0] != null && typeof args[0] === 'object') {
-                    return store.dispatch(args[0]);
-                }
-
-                throw new TypeError('Polymer Redux: <' + tag + '>.dispatch must be given an action name, function or native redux action object');
+                // action
+                return store.dispatch(args[0]);
             },
             getState: function() {
                 return store.getState();
