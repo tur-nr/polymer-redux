@@ -1,8 +1,9 @@
 {
   "name": "polymer-redux",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "authors": [
-    "Christopher Turner <turner296@gmail.com>"
+    "Christopher Turner <turner296@gmail.com>",
+    "Steven Zhang <jdomzhang@gmail.com>"
   ],
   "description": "Polymer bindings for Redux.",
   "main": "polymer-redux.html",

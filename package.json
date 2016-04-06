@@ -1,14 +1,14 @@
 {
   "name": "polymer-redux",
-  "version": "0.0.0",
+  "version": "0.0.3",
   "description": "Polymer bindings for Redux.",
   "main": "polymer-redux.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "serve"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tur-nr/polymer-redux.git"
+    "url": "git+https://github.com/jdomzhang/polymer-redux.git"
   },
   "keywords": [
     "redux",
@@ -26,5 +26,12 @@
   "devDependencies": {
     "bower": "^1.5.2",
     "redux": "^3.0.5"
-  }
+  },
+  "contributors": [
+    {
+      "name": "Steven Zhang",
+      "email": "jdomzhang@gmail.com",
+      "url": "https://github.com/jdomzhang"
+    }
+  ]
 }
