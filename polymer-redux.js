@@ -14,34 +14,44 @@
             return function() {
                 var state = store.getState();
                 props.forEach(function(property) {
+                    var value, setter;
                     if (typeof property.path == 'function') {
-                        this[property.name] = property.path.call(this,state);
+                        value = property.path.call(this,state);
                     }
                     else {
-                        this[property.name] = Polymer.Base.get(property.path, state);
+                        value = Polymer.Base.get(property.path, state);
+                    }
+                    // binding upwards
+                    if (property.readOnly) {
+                        setter = '_set' + Polymer.Bind.upper(property.name);
+                        element[setter](value);
+                    } else {
+                        element[property.name] = value;
                     }
                 }, element);
             }
-        }
+        };
 
         return {
             ready: function() {
                 var props = [];
                 var tag = this.constructor.name;
                 var fire = this.fire.bind(this);
-                var listener;
+                var listener, prop;
 
                 // property bindings
                 for (var name in this.properties) {
                     if (this.properties.hasOwnProperty(name)) {
                         if (this.properties[name].statePath) {
+                            prop = this.properties[name];
                             // notify flag, warn against two-way bindings
-                            if (this.properties[name].notify) {
+                            if (prop.notify && !prop.readOnly) {
                                 console.warn(warning, tag, name);
                             }
                             props.push({
                                 name: name,
-                                path: this.properties[name].statePath
+                                path: prop.statePath,
+                                readOnly: prop.readOnly
                             });
                         }
                     }
@@ -51,8 +61,8 @@
                 if (props.length) {
                     listener = createListener(this, props);
                     store.subscribe(function() {
-                      listener();
-                      fire('state-changed', store.getState());
+                        listener();
+                        fire('state-changed', store.getState());
                     });
                     listener(); // starts state binding
                 }
