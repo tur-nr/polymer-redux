@@ -16,7 +16,7 @@
                 props.forEach(function(property) {
                     var value, setter;
                     if (typeof property.path == 'function') {
-                        value = property.path.call(this,state);
+                        value = property.path.call(element, state);
                     }
                     else {
                         value = Polymer.Base.get(property.path, state);
@@ -28,7 +28,7 @@
                     } else {
                         element[property.name] = value;
                     }
-                }, element);
+                });
             }
         };
 
@@ -70,15 +70,16 @@
             dispatch: function() {
                 var args = Array.prototype.slice.call(arguments);
                 var tag = this.constructor.name;
+                var actions = this.actions;
                 var name;
 
                 // action name
-                if (typeof args[0] === 'string') {
+                if (actions && typeof args[0] === 'string') {
                     name = args.splice(0, 1);
-                    if (typeof this.actions[name] !== 'function') {
-                        throw new TypeError('Polymer Redux: <' + tag + '> has no action "' + action + '"');
+                    if (typeof actions[name] !== 'function') {
+                        throw new TypeError('Polymer Redux: <' + tag + '> has no action "' + name + '"');
                     }
-                    return store.dispatch(this.actions[name].apply(this, args));
+                    return store.dispatch(actions[name].apply(this, args));
                 }
 
                 // action creator
