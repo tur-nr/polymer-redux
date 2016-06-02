@@ -11,22 +11,30 @@
 
     return function(store) {
         var createListener = function(element, props) {
+            var prevArrays = {};
             return function() {
                 var state = store.getState();
                 props.forEach(function(property) {
-                    var value, setter;
+                    var splices = [];
+                    var value, previous;
                     if (typeof property.path == 'function') {
                         value = property.path.call(element, state);
-                    }
-                    else {
+                    } else {
                         value = Polymer.Base.get(property.path, state);
                     }
-                    // binding upwards
-                    if (property.readOnly) {
-                        setter = '_set' + Polymer.Bind.upper(property.name);
-                        element[setter](value);
-                    } else {
-                        element[property.name] = value;
+                    // type of array, work out splices before setting the value
+                    if (property.type === Array) {
+                        // compare the splices from a previous copy
+                        previous = prevArrays[property.name] || [];
+                        splices = Polymer.ArraySplice.calculateSplices(value, previous);
+                        // keep for next compare
+                        prevArrays[property.name] = value ? value.concat() : [];
+                    }
+                    // set
+                    element.notifyPath(property.name, value, !property.readOnly);
+                    // notify element of splices
+                    if (splices.length) {
+                        element.notifySplices(property.name, splices);
                     }
                 });
             }
@@ -51,7 +59,8 @@
                             props.push({
                                 name: name,
                                 path: prop.statePath,
-                                readOnly: prop.readOnly
+                                readOnly: prop.readOnly,
+                                type: prop.type
                             });
                         }
                     }
