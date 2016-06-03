@@ -17,11 +17,14 @@
                 props.forEach(function(property) {
                     var splices = [];
                     var value, previous;
+
+                    // statePath a path or function
                     if (typeof property.path == 'function') {
                         value = property.path.call(element, state);
                     } else {
                         value = Polymer.Base.get(property.path, state);
                     }
+
                     // type of array, work out splices before setting the value
                     if (property.type === Array) {
                         // compare the splices from a previous copy
@@ -30,8 +33,14 @@
                         // keep for next compare
                         prevArrays[property.name] = value ? value.concat() : [];
                     }
+
                     // set
-                    element.notifyPath(property.name, value, !property.readOnly);
+                    if (property.readOnly) {
+                        element.notifyPath(property.name, value);
+                    } else {
+                        element.set(property.name, value);
+                    }
+
                     // notify element of splices
                     if (splices.length) {
                         element.notifySplices(property.name, splices);
