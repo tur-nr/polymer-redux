@@ -49,18 +49,23 @@
             }
         };
 
+        // check for store
+        if (!store) {
+            throw new TypeError('missing redux store');
+        }
+
         return {
             ready: function() {
                 var props = [];
-                var tag = this.constructor.name;
-                var fire = this.fire.bind(this);
+                var element = this;
+                var tag = element.is;
                 var listener, prop;
 
                 // property bindings
-                for (var name in this.properties) {
-                    if (this.properties.hasOwnProperty(name)) {
-                        if (this.properties[name].statePath) {
-                            prop = this.properties[name];
+                for (var name in element.properties) {
+                    if (element.properties.hasOwnProperty(name)) {
+                        if (element.properties[name].statePath) {
+                            prop = element.properties[name];
                             // notify flag, warn against two-way bindings
                             if (prop.notify && !prop.readOnly) {
                                 console.warn(warning, tag, name);
@@ -77,17 +82,17 @@
 
                 // subscribe properties to state change
                 if (props.length) {
-                    listener = createListener(this, props);
+                    listener = createListener(element, props);
                     store.subscribe(function() {
                         listener();
-                        fire('state-changed', store.getState());
+                        element.fire('state-changed', store.getState());
                     });
                     listener(); // starts state binding
                 }
             },
             dispatch: function() {
                 var args = Array.prototype.slice.call(arguments);
-                var tag = this.constructor.name;
+                var tag = this.is;
                 var actions = this.actions;
                 var name;
 

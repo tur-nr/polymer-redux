@@ -4,7 +4,7 @@
   "description": "Polymer bindings for Redux.",
   "main": "polymer-redux.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "polymer test"
   },
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
     "polymer",
     "web",
     "component",
-    "reducer"
+    "state"
   ],
   "author": "Christopher Turner <turner296@gmail.com>",
   "license": "MIT",
@@ -26,7 +26,6 @@
   "devDependencies": {
     "bower": "^1.5.2",
     "polymer-cli": "^0.11.1",
-    "redux": "^3.0.5",
-    "web-component-tester": "^4.2.2"
+    "redux": "^3.0.5"
   }
 }

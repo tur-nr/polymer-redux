@@ -7,26 +7,252 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <script src="../../web-component-tester/browser.js"></script>
-
     <link rel="import" href="../polymer-redux.html">
   </head>
   <body>
+    <!-- spec boilerplate -->
+    <script>
+        const sandbox = sinon.sandbox.create()
+        const getState = sandbox.stub()
+        const subscribe = sandbox.stub()
+        const dispatch = sandbox.stub()
+        const demoAction = sandbox.stub()
+        const stateFunc = sandbox.stub()
+        const warn = sandbox.spy(console, 'warn')
+        const store = {getState, subscribe, dispatch}
+        const ReduxBehavior = new PolymerRedux(store)
 
-    <test-fixture id="basic">
+        Polymer({
+          is: 'polymer-redux-test',
+          behaviors: [ ReduxBehavior ],
+          properties: {
+            scalar: {
+              type: String,
+              statePath: 'scalar'
+            },
+            stateFunc: {
+              type: String,
+              statePath: stateFunc
+            },
+            warn: {
+              type: Boolean,
+              statePath: 'warn',
+              notify: true
+            }
+          },
+          actions: {
+            demo: demoAction
+          }
+        })
+
+        Polymer({
+          is: 'polymer-redux-noprops',
+          behaviors: [ ReduxBehavior ]
+        })
+    </script>
+
+    <!-- spec fixtures -->
+    <test-fixture id="polymer-redux-fixture">
       <template>
-        <polymer-redux></polymer-redux>
+        <polymer-redux-test></polymer-redux-test>
       </template>
     </test-fixture>
 
+    <test-fixture id="polymer-redux-noprops-fixture">
+      <template>
+        <polymer-redux-noprops></polymer-redux-noprops>
+      </template>
+    </test-fixture>
+
+    <!-- specs -->
     <script>
       suite('polymer-redux', function() {
+        suite('#PolymerRedux', function() {
+          test('should throw when store missing', function() {
+            assert.throws(function() {
+              new PolymerRedux(/* no store */)
+            }, /missing redux store/)
+          })
+        })
 
-        test('instantiating the element works', function() {
-          let element = fixture('basic');
-          assert.equal(element.is, 'polymer-redux');
-        });
+        suite('ReduxBehavior', function() {
+          suite('element', function() {
+            const element = fixture('polymer-redux-fixture')
 
-      });
+            test('should have #dispatch method', function() {
+              assert.typeOf(element.dispatch, 'function')
+            })
+
+            test('should have #getState method', function() {
+              assert.typeOf(element.getState, 'function')
+            })
+          })
+
+          suite('#ready', function() {
+            suite('properties', function() {
+              suiteSetup(function() {
+                subscribe.reset()
+                warn.reset()
+                fixture('polymer-redux-fixture')
+              })
+
+              test('should subscribe to redux store', function() {
+                sinon.assert.calledOnce(subscribe)
+              })
+
+              test('should warn on two-way bindings notify flag', function() {
+                sinon.assert.calledWithMatch(
+                  warn,
+                  sinon.match.string,
+                  sinon.match.string,
+                  sinon.match.same('warn')
+                )
+              })
+            })
+
+            suite('no properties', function() {
+              suiteSetup(function() {
+                subscribe.reset()
+                fixture('polymer-redux-noprops-fixture')
+              })
+
+              test('should not subscribe to redux store', function() {
+                sinon.assert.notCalled(subscribe)
+              })
+            })
+
+            suite('state-changed event', function() {
+              const state = {event: 'fired'}
+              let element
+              let fire
+
+              suiteSetup(function() {
+                let subscriber
+                store.subscribe = function(fn) {
+                  subscriber = fn
+                }
+                element = fixture('polymer-redux-fixture')
+                fire = sinon.spy(element, 'fire')
+                getState.returns(state)
+                subscriber() // trigger state change
+              })
+
+              suiteTeardown(function() {
+                store.subscribe = subscribe
+                getState.reset()
+              })
+
+              test('should fire "state-changed" event', function() {
+                sinon.assert.calledWithMatch(
+                  fire,
+                  sinon.match.same('state-changed'),
+                  sinon.match.same(state)
+                )
+              })
+
+              suite('should getState', function() {
+                sinon.assert.calledOnce(getState)
+              })
+            })
+          })
+
+          suite('#dipatch', function() {
+            const action = {type: 'SPEC_DEMO'}
+            const element = fixture('polymer-redux-fixture')
+
+            suiteSetup(function() {
+              sandbox.reset()
+            })
+
+            setup(function() {
+              dispatch.reset()
+              dispatch.returnsArg(0)
+            })
+
+            suite('actions list', function() {
+              suiteSetup(function() {
+                demoAction.returns(action)
+              })
+
+              suiteTeardown(function() {
+                demoAction.reset()
+              })
+
+              test('should throw if action doesn\'t exist', function() {
+                assert.throws(function() {
+                  element.dispatch('unknown')
+                }, /has no action "unknown"/)
+              })
+
+              test('should call action with element as context', function() {
+                element.dispatch('demo')
+                sinon.assert.calledOn(demoAction, element)
+              })
+
+              test('should call action with args', function() {
+                element.dispatch('demo', 'arg1', 'arg2')
+                sinon.assert.calledWithExactly(demoAction, 'arg1', 'arg2')
+              })
+            })
+
+            suite('zero length functions', function() {
+              const action = {type: 'func'}
+              const cb = sinon.stub().returns(action)
+
+              setup(function() {
+                cb.reset()
+                element.dispatch(cb)
+              })
+
+              test('should call function', function() {
+                sinon.assert.calledOnce(cb)
+              })
+
+              test('should give dispatch returning action', function() {
+                sinon.assert.calledWith(dispatch, action)
+              })
+
+              test('should not call non-zero functions', function() {
+                const mw = sinon.spy(function(state) {})
+                element.dispatch(mw)
+                sinon.assert.notCalled(mw)
+              })
+            })
+
+            suite('redux actions/middleware', function() {
+              test('should proxy actions to redux dispatch', function() {
+                const action = {type: 'redux'}
+                element.dispatch(action)
+                sinon.assert.calledWith(dispatch, action)
+              })
+
+              test('should proxy middleware to redux dispatch', function() {
+                const mw = sinon.spy(function(state) {})
+                element.dispatch(mw)
+                sinon.assert.calledWith(dispatch, mw)
+              })
+            })
+          })
+
+          suite('#getState', function() {
+            const element = fixture('polymer-redux-fixture')
+            const state = {spec: true}
+
+            suiteSetup(function() {
+              sandbox.reset()
+              getState.returns(state)
+            })
+
+            test('should return current state', function() {
+              assert.strictEqual(element.getState(), state)
+            })
+
+            test('should call redux getState', function() {
+              sinon.assert.calledOnce(getState)
+            })
+          })
+        })
+      })
     </script>
   </body>
 </html>
