@@ -26,6 +26,6 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "~1.1.3"
+    "polymer": "^1.1.3"
   }
 }

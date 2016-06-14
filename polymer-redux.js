@@ -11,37 +11,65 @@
 
     return function(store) {
         var createListener = function(element, props) {
+            var prevArrays = {};
             return function() {
                 var state = store.getState();
                 props.forEach(function(property) {
+                    var splices = [];
+                    var value, previous;
+
+                    // statePath a path or function
                     if (typeof property.path == 'function') {
-                        this[property.name] = property.path.call(this,state);
+                        value = property.path.call(element, state);
+                    } else {
+                        value = Polymer.Base.get(property.path, state);
                     }
-                    else {
-                        this[property.name] = Polymer.Base.get(property.path, state);
+
+                    // type of array, work out splices before setting the value
+                    if (property.type === Array) {
+                        // compare the splices from a previous copy
+                        previous = prevArrays[property.name] || [];
+                        splices = Polymer.ArraySplice.calculateSplices(value, previous);
+                        // keep for next compare
+                        prevArrays[property.name] = value ? value.concat() : [];
                     }
-                }, element);
+
+                    // set
+                    if (property.readOnly) {
+                        element.notifyPath(property.name, value);
+                    } else {
+                        element.set(property.name, value);
+                    }
+
+                    // notify element of splices
+                    if (splices.length) {
+                        element.notifySplices(property.name, splices);
+                    }
+                });
             }
-        }
+        };
 
         return {
             ready: function() {
                 var props = [];
                 var tag = this.constructor.name;
                 var fire = this.fire.bind(this);
-                var listener;
+                var listener, prop;
 
                 // property bindings
                 for (var name in this.properties) {
                     if (this.properties.hasOwnProperty(name)) {
                         if (this.properties[name].statePath) {
+                            prop = this.properties[name];
                             // notify flag, warn against two-way bindings
-                            if (this.properties[name].notify) {
+                            if (prop.notify && !prop.readOnly) {
                                 console.warn(warning, tag, name);
                             }
                             props.push({
                                 name: name,
-                                path: this.properties[name].statePath
+                                path: prop.statePath,
+                                readOnly: prop.readOnly,
+                                type: prop.type
                             });
                         }
                     }
@@ -51,8 +79,8 @@
                 if (props.length) {
                     listener = createListener(this, props);
                     store.subscribe(function() {
-                      listener();
-                      fire('state-changed', store.getState());
+                        listener();
+                        fire('state-changed', store.getState());
                     });
                     listener(); // starts state binding
                 }
@@ -60,15 +88,16 @@
             dispatch: function() {
                 var args = Array.prototype.slice.call(arguments);
                 var tag = this.constructor.name;
+                var actions = this.actions;
                 var name;
 
                 // action name
-                if (typeof args[0] === 'string') {
+                if (actions && typeof args[0] === 'string') {
                     name = args.splice(0, 1);
-                    if (typeof this.actions[name] !== 'function') {
-                        throw new TypeError('Polymer Redux: <' + tag + '> has no action "' + action + '"');
+                    if (typeof actions[name] !== 'function') {
+                        throw new TypeError('Polymer Redux: <' + tag + '> has no action "' + name + '"');
                     }
-                    return store.dispatch(this.actions[name].apply(this, args));
+                    return store.dispatch(actions[name].apply(this, args));
                 }
 
                 // action creator
