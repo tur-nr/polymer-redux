@@ -29,7 +29,7 @@
                     if (property.type === Array) {
                         // compare the splices from a previous copy
                         previous = prevArrays[property.name] || [];
-                        splices = Polymer.ArraySplice.calculateSplices(value, previous);
+                        splices = Polymer.ArraySplice.calculateSplices((value || []), previous);
                         // keep for next compare
                         prevArrays[property.name] = value ? value.concat() : [];
                     }

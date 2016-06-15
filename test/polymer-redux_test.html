@@ -38,6 +38,19 @@
               type: Boolean,
               statePath: 'warn',
               notify: true
+            },
+            hash: {
+              type: Object,
+              statePath: 'hash'
+            },
+            list: {
+              type: Array,
+              statePath: 'list'
+            },
+            read: {
+              type: String,
+              statePath: 'read',
+              readOnly: true
             }
           },
           actions: {
@@ -85,6 +98,58 @@
 
             test('should have #getState method', function() {
               assert.typeOf(element.getState, 'function')
+            })
+
+            suite('updating properties', function() {
+              let element
+              let subscriber
+
+              suiteSetup(function() {
+                store.subscribe = function(fn) {
+                  subscriber = fn
+                }
+                element = fixture('polymer-redux-fixture')
+              })
+
+              suiteTeardown(function() {
+                store.subscribe = subscribe
+              })
+
+              suite('scalar property', function() {
+
+              })
+
+              suite('readonly property', function() {
+                let notify
+                let set
+
+                suiteSetup(function() {
+                  notify = sinon.spy(element, 'notifyPath')
+                  set = sinon.spy(element, 'set')
+                  getState.returns({
+                    read: 'foo'
+                  })
+                  subscriber()
+                })
+
+                suiteTeardown(function() {
+                  notify.restore()
+                  set.restore()
+                  getState.reset()
+                })
+
+                test('should use notifyPath', function() {
+                  sinon.assert.calledWith(notify, 'read', 'foo')
+                })
+
+                test('should not use set', function() {
+                  sinon.assert.neverCalledWith(set, 'read', 'foo')
+                })
+
+                test('should have new property value', function() {
+                  assert.equal(element.read, 'foo')
+                })
+              })
             })
           })
 
