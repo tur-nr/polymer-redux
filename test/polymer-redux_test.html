@@ -31,17 +31,13 @@
               statePath: 'scalar'
             },
             stateFunc: {
-              type: String,
+              type: Array,
               statePath: stateFunc
             },
             warn: {
               type: Boolean,
               statePath: 'warn',
               notify: true
-            },
-            hash: {
-              type: Object,
-              statePath: 'hash'
             },
             list: {
               type: Array,
@@ -51,6 +47,10 @@
               type: String,
               statePath: 'read',
               readOnly: true
+            },
+            deep: {
+              type: Number,
+              statePath: 'really.deep.num'
             }
           },
           actions: {
@@ -103,39 +103,134 @@
             suite('updating properties', function() {
               let element
               let subscriber
+              let notify
+              let set
+              let get
+              let splices
+              let calc
 
               suiteSetup(function() {
                 store.subscribe = function(fn) {
                   subscriber = fn
                 }
                 element = fixture('polymer-redux-fixture')
+                notify = sinon.spy(element, 'notifyPath')
+                set = sinon.spy(element, 'set')
+                splices = sinon.spy(element, 'notifySplices')
+                get = sinon.spy(Polymer.Base, 'get')
+                calc = sinon.spy(Polymer.ArraySplice, 'calculateSplices')
               })
 
               suiteTeardown(function() {
                 store.subscribe = subscribe
+                notify.restore()
+                set.restore()
+                get.restore()
+                splices.restore()
+                calc.restore()
               })
 
-              suite('scalar property', function() {
-
-              })
-
-              suite('readonly property', function() {
-                let notify
-                let set
+              suite('property', function() {
+                const state = { scalar: 'foo' }
 
                 suiteSetup(function() {
-                  notify = sinon.spy(element, 'notifyPath')
-                  set = sinon.spy(element, 'set')
-                  getState.returns({
-                    read: 'foo'
-                  })
+                  getState.returns(state)
+                  notify.reset()
+                  splices.reset()
+                  get.reset()
+                  set.reset()
+                  calc.reset()
                   subscriber()
                 })
 
                 suiteTeardown(function() {
-                  notify.restore()
-                  set.restore()
                   getState.reset()
+                })
+
+                test('should use Polymer.Base.get', function() {
+                  sinon.assert.calledWith(get, 'scalar', state)
+                })
+
+                test('should use set', function() {
+                  sinon.assert.calledWith(set, 'scalar', 'foo')
+                })
+
+                test('should not use notifyPath', function() {
+                  sinon.assert.neverCalledWith(notify, 'scalar', 'foo')
+                })
+
+                test('should not call notifySplices', function() {
+                  sinon.assert.notCalled(splices)
+                })
+
+                test('should have new property value', function() {
+                  assert.equal(element.scalar, 'foo')
+                })
+              })
+
+              suite('state func', function() {
+                const state = { foo: 'bar' }
+                const list = []
+
+                suiteSetup(function() {
+                  getState.returns(state)
+                  stateFunc.returns(list)
+                  notify.reset()
+                  splices.reset()
+                  get.reset()
+                  set.reset()
+                  calc.reset()
+                  subscriber()
+                })
+
+                suiteTeardown(function() {
+                  getState.reset()
+                  stateFunc.reset()
+                })
+
+                test('should not use Polymer.Base.get', function() {
+                  sinon.assert.callCount(get, 5) // 6 properties
+                })
+
+                test('stateFunc should be called', function() {
+                  sinon.assert.calledWith(stateFunc, state)
+                })
+
+                test('should use set', function() {
+                  sinon.assert.calledWith(set, 'list', list)
+                })
+
+                test('should not use notifyPath', function() {
+                  sinon.assert.neverCalledWith(notify, 'scalar', 'foo')
+                })
+
+                test('should not call notifySplices', function() {
+                  sinon.assert.notCalled(splices)
+                })
+
+                test('should have new property value', function() {
+                  assert.equal(element.scalar, 'foo')
+                })
+              })
+
+              suite('readonly property', function() {
+                const state = { read: 'foo' }
+                suiteSetup(function() {
+                  getState.returns(state)
+                  notify.reset()
+                  splices.reset()
+                  get.reset()
+                  set.reset()
+                  calc.reset()
+                  subscriber()
+                })
+
+                suiteTeardown(function() {
+                  getState.reset()
+                })
+
+                test('should use Polymer.Base.get', function() {
+                  sinon.assert.calledWith(get, 'read', state)
                 })
 
                 test('should use notifyPath', function() {
@@ -144,6 +239,10 @@
 
                 test('should not use set', function() {
                   sinon.assert.neverCalledWith(set, 'read', 'foo')
+                })
+
+                test('should not call notifySplices', function() {
+                  sinon.assert.notCalled(splices)
                 })
 
                 test('should have new property value', function() {
