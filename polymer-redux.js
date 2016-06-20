@@ -26,7 +26,7 @@
                     }
 
                     // type of array, work out splices before setting the value
-                    if (property.type === Array) {
+                    if (property.type === Array && value !== undefined) {
                         // compare the splices from a previous copy
                         previous = prevArrays[property.name] || [];
                         splices = Polymer.ArraySplice.calculateSplices(value, previous);
