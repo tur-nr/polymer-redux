@@ -4,6 +4,7 @@
   "description": "Polymer bindings for Redux.",
   "main": "polymer-redux.js",
   "scripts": {
+    "postinstall": "bower install"
     "test": "polymer test"
   },
   "repository": {
