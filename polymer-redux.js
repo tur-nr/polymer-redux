@@ -26,7 +26,7 @@
                     }
 
                     // type of array, work out splices before setting the value
-                    if (property.type === Array && value !== undefined) {
+                    if (property.type === Array) {
                         // compare the splices from a previous copy
                         previous = prevArrays[property.name] || [];
                         value = value || []
