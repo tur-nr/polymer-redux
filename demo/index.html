@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Polymer Redux demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.5.2/redux.min.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+
+    <link rel="import" href="../polymer-redux.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+    </style>
+  </head>
+  <body>
+
+    <div class="vertical-section-container">
+      <h3>Polymer Redux Demo</h3>
+      <demo-snippet>
+        <template>
+          <!-- redux setup -->
+          <script>
+            const reducer = (state, action) => {
+              if (!state) return { friends: [] }
+
+              switch (action.type) {
+                case 'ADD_FRIEND':
+                  state.friends.push(action.friend)
+                  break
+                case 'REMOVE_FRIEND':
+                  const idx = state.friends.indexOf(action.friend)
+                  if (idx !== -1) {
+                      state.friends.splice(idx, 1)
+                  }
+                  break
+                case 'SORT_FRIENDS':
+                  state.friends.sort()
+                  break
+              }
+
+              return state
+            }
+            const store = Redux.createStore(reducer)
+            const ReduxBehavior = PolymerRedux(store)
+          </script>
+
+          <!-- friends list module -->
+          <dom-module id="friends-list">
+            <template>
+              <p>
+                <span>You have [[friends.length]] friend(s).</span>
+                <template is="dom-if" if="[[canSortFriends(friends.length)]]">
+                  <button on-click="sortFriends">Sort Friends</button>
+                </template>
+              </p>
+              <ul>
+                <template is="dom-repeat" items="[[friends]]">
+                  <li>
+                    <span>[[item]]</span>
+                    <button on-click="removeFriend">Remove</button>
+                  </li>
+                </template>
+              </ul>
+              <input id="friend-name" placeholder="Name" on-keypress="handleKeypress">
+              <button on-click="addFriend">Add Friend</button>
+            </template>
+          </dom-module>
+          <script>
+            Polymer({
+              is: 'friends-list',
+              behaviors: [ ReduxBehavior ],
+              properties: {
+                friends: {
+                  type: Array,
+                  statePath: 'friends'
+                }
+              },
+              actions: {
+                add: function(name) {
+                  return {
+                    type: 'ADD_FRIEND',
+                    friend: name
+                  };
+                },
+                remove: function(name) {
+                  return {
+                    type: 'REMOVE_FRIEND',
+                    friend: name
+                  };
+                },
+                sort: function() {
+                  return {
+                    type: 'SORT_FRIENDS'
+                  };
+                },
+              },
+              addFriend: function() {
+                const input = this.$['friend-name']
+                if (input.value) {
+                  this.dispatch('add', input.value)
+                  input.value = ''
+                  input.focus()
+                }
+              },
+              removeFriend: function(event) {
+                this.dispatch('remove', event.model.item)
+              },
+              sortFriends: function() {
+                this.dispatch('sort')
+              },
+              canSortFriends: function(length) {
+                return length > 1
+              },
+              handleKeypress: function(event) {
+                if (event.charCode === 13) {
+                  this.addFriend()
+                }
+              }
+            });
+          </script>
+
+          <!-- demo -->
+          <friends-list></friends-list>
+        </template>
+      </demo-snippet>
+    </div>
+  </body>
+</html>

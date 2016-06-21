@@ -1,5 +1,7 @@
 # Polymer Redux
 
+[![Build Status](https://travis-ci.org/tur-nr/polymer-redux.svg?branch=master)](https://travis-ci.org/tur-nr/polymer-redux)
+
 Polymer bindings for Redux. Bind store state to properties and dispatch
 actions from within Polymer Elements.
 
@@ -61,7 +63,7 @@ it's state and dispatch actions.
 ### Binding Properties
 
 Polymer Redux binds state to the components properties. This binding happens on
-the `created` callback. To bind a property to a value in the state set the 
+the `created` callback. To bind a property to a value in the state set the
 `statePath` key when defining properties in Polymer.
 
 ```javascript
@@ -87,9 +89,9 @@ Binding properties this way makes use of [`Polymer.Base.get()`](http://polymer.g
 
 #### Dynamic Bindings
 
-There are cases, when a static `statePath` can't be provided when defining properties in a Polymer element. 
+There are cases, when a static `statePath` can't be provided when defining properties in a Polymer element.
 
-Take for example this state tree: 
+Take for example this state tree:
 
 ```javascript
 {
@@ -102,9 +104,9 @@ Take for example this state tree:
 }
 ```
 
-To create a Polymer element that allows you to edit a todo from the `todosById` object based on a key/id stored in the `todoToEdit` property, the binding has to be dynamic.  
-To allow these use cases the `statePath` can also take a `Function` instead of a `String`. The function will be called and the `state` will be passed into it as a parameter: 
- 
+To create a Polymer element that allows you to edit a todo from the `todosById` object based on a key/id stored in the `todoToEdit` property, the binding has to be dynamic.
+To allow these use cases the `statePath` can also take a `Function` instead of a `String`. The function will be called and the `state` will be passed into it as a parameter:
+
 ```javascript
 Polymer({
     is: 'my-element',
@@ -116,7 +118,7 @@ Polymer({
         }
     }
 });
-```    
+```
 
 #### Two-way Bindings
 

@@ -4,7 +4,8 @@
   "description": "Polymer bindings for Redux.",
   "main": "polymer-redux.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "bower install",
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
@@ -15,7 +16,7 @@
     "polymer",
     "web",
     "component",
-    "reducer"
+    "state"
   ],
   "author": "Christopher Turner <turner296@gmail.com>",
   "license": "MIT",
@@ -25,6 +26,9 @@
   "homepage": "https://github.com/tur-nr/polymer-redux#readme",
   "devDependencies": {
     "bower": "^1.5.2",
-    "redux": "^3.0.5"
+    "gulp": "^3.9.1",
+    "polymer-cli": "^0.11.1",
+    "redux": "^3.0.5",
+    "web-component-tester": "^4.2.2"
   }
 }
