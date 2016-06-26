@@ -129,7 +129,7 @@ binding via the `notify` flag. If the properties flagged with `notify` and have
 
 ### Dispatching Actions
 
-For an easier and semanatic way to dispatch actions against the store, is to create a list of actions the component can trigger. Adding a list of functions to the `actions` property, exoses them to the `dispatch()` method of the element.
+For an easier and semantic way to dispatch actions against the store, is to create a list of actions the component can trigger. Adding a list of functions to the `actions` property, exposes them to the `dispatch()` method of the element.
 
 ```javascript
 Polymer({
@@ -148,7 +148,7 @@ Polymer({
 });
 ```
 
-`dispatch()` also takes a function that returns a action object, or the standard redux way.
+`dispatch()` also takes a function that returns an action object, or the standard redux way.
 
 ```javascript
 Polymer({
