@@ -120,6 +120,33 @@ Polymer({
 });
 ```
 
+##### Selectors
+
+The same way you use `statePath` as function, you can also give it a [selector](https://github.com/reactjs/reselect).
+
+```javascript
+const getTodos = state => state.todos;
+const getEditId = state => state.todoToEdit;
+const editTodoSelector = Reselect.createSelector(
+    getTodos,
+    getEditId,
+    // we use a function to allow element binding
+    function(todos, id) {
+        return state.todosById[id];
+    }
+);
+Polymer({
+    properties: {
+        todo: {
+            type: String,
+            statePath: editTodoSelector
+        }
+    }
+})
+```
+
+Just be aware when using selectors, they are an optimisation utility. When mutating objects or arrays, be sure to return a new instance or the selector will return cached response and the element won't update. Polymer is already optimised to calculate the minimal changes to properties so you may not need selectors. 
+
 #### Two-way Bindings
 
 Principle #2 of Redux's [Three Principles](http://redux.js.org/docs/introduction/ThreePrinciples.html),
@@ -148,22 +175,40 @@ Polymer({
 });
 ```
 
-`dispatch()` also takes a function that returns an action object, or the standard redux way.
+`dispatch()` also takes a function that returns an action object. This function must have a length of zero, otherwise it will pass the function to Redux as middleware function. Or you may use the standard Redux way of dispatching.
 
 ```javascript
 Polymer({
     handleClick: function() {
-        this.dispatch(function() {
+        this.dispatch(function() { // !!! ZERO LENGTH !!!
             return {
                type: 'ACTION'
             };
         });
-        // or
+        // or the standard redux way
         this.dispatch({
             type: 'ACTION'
         });
     }
 });
+```
+
+#### Dispatching Async Actions
+
+When you need to dispatch Async with [redux-thunk](https://github.com/gaearon/redux-thunk) actions it is good practice to use `dispatch()` like so.
+
+```javascript
+Polymer({
+    handleClick: function() {
+        this.dispatch(function(dispatch) {
+            dispatch({ type: 'REQUEST_STARTED' });
+            // do async task
+            setTimeout(function() {
+                dispatch({ type: 'REQUEST_ENDED' })
+            }, 1000);
+        });
+    }
+})
 ```
 
 ## API
@@ -195,6 +240,17 @@ Returns the action object.
 ##### `#dispatch(<fn>)`
 
 * `fn` Function, returning action object.
+
+`fn` must be of length zero to use `#dispatch()` this way.
+
+Returns the action object.
+
+
+##### `#dispatch(<fn>)`
+
+* `fn` Function, returning action object.
+
+`fn` must have at least a length of one to use `#dispatch` as a middleware.
 
 Returns the action object.
 
