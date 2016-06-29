@@ -1,4 +1,4 @@
-(function (root, factory) {
+(function(root, factory) {
     if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = factory(require('redux'));
     } else if (typeof define === 'function' && define.amd) {
@@ -6,15 +6,15 @@
     } else {
         root['PolymerRedux'] = factory(root.Redux);
     }
-})(this, function (Redux) {
+})(this, function(Redux) {
     var warning = 'Polymer Redux: <%s>.%s has "notify" enabled, two-way bindings goes against redux\'s paradigm';
 
-    return function (store) {
-        var createListener = function (element, props) {
+    return function(store) {
+        var createListener = function(element, props) {
             var prevArrays = {};
-            return function () {
+            return function() {
                 var state = store.getState();
-                props.forEach(function (property) {
+                props.forEach(function(property) {
                     var propName = property.name;
                     var splices = [];
                     var value, previous;
@@ -61,14 +61,14 @@
         }
 
         return {
-            ready: function () {
+            ready: function() {
                 var props = [];
                 var element = this;
                 var tag = element.is;
                 var listener, prop;
 
                 // property bindings
-                Object.keys(element.properties).forEach(function (name) {
+                Object.keys(element.properties).forEach(function(name) {
                     if (element.properties[name].statePath) {
                         prop = element.properties[name];
                         // notify flag, warn against two-way bindings
@@ -87,14 +87,14 @@
                 // subscribe properties to state change
                 if (props.length) {
                     listener = createListener(element, props);
-                    store.subscribe(function () {
+                    store.subscribe(function() {
                         listener();
                         element.fire('state-changed', store.getState());
                     });
                     listener(); // starts state binding
                 }
             },
-            dispatch: function (action) {
+            dispatch: function(action) {
                 var args = Array.prototype.slice.call(arguments);
                 var tag = this.is;
                 var actions = this.actions;
