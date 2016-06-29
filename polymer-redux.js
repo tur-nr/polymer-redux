@@ -15,6 +15,7 @@
             return function() {
                 var state = store.getState();
                 props.forEach(function(property) {
+                    var propName = property.name;
                     var splices = [];
                     var value, previous;
 
@@ -28,27 +29,27 @@
                     // type of array, work out splices before setting the value
                     if (property.type === Array) {
                         // compare the splices from a previous copy
-                        previous = prevArrays[property.name] || [];
-                        value = value || []
+                        previous = prevArrays[propName] || [];
+                        value = value || [];
                         // check the value type
-                        if (value && !Array.isArray(value)) {
-                            throw new TypeError('<%s>.%s type is Array but given: %s', element.is, property.name, typeof value);
+                        if (!Array.isArray(value)) {
+                            throw new TypeError('<%s>.%s type is Array but given: %s', element.is, propName, typeof value);
                         }
                         splices = Polymer.ArraySplice.calculateSplices(value, previous);
                         // keep for next compare
-                        prevArrays[property.name] = value ? value.concat() : [];
+                        prevArrays[propName] = value.slice();
                     }
 
                     // set
                     if (property.readOnly) {
-                        element.notifyPath(property.name, value);
+                        element.notifyPath(propName, value);
                     } else {
-                        element.set(property.name, value);
+                        element.set(propName, value);
                     }
 
                     // notify element of splices
                     if (splices.length) {
-                        element.notifySplices(property.name, splices);
+                        element.notifySplices(propName, splices);
                     }
                 });
             }
@@ -67,23 +68,21 @@
                 var listener, prop;
 
                 // property bindings
-                for (var name in element.properties) {
-                    if (element.properties.hasOwnProperty(name)) {
-                        if (element.properties[name].statePath) {
-                            prop = element.properties[name];
-                            // notify flag, warn against two-way bindings
-                            if (prop.notify && !prop.readOnly) {
-                                console.warn(warning, tag, name);
-                            }
-                            props.push({
-                                name: name,
-                                path: prop.statePath,
-                                readOnly: prop.readOnly,
-                                type: prop.type
-                            });
+                Object.keys(element.properties).forEach(function(name) {
+                    if (element.properties[name].statePath) {
+                        prop = element.properties[name];
+                        // notify flag, warn against two-way bindings
+                        if (prop.notify && !prop.readOnly) {
+                            console.warn(warning, tag, name);
                         }
+                        props.push({
+                            name: name,
+                            path: prop.statePath,
+                            readOnly: prop.readOnly,
+                            type: prop.type
+                        });
                     }
-                }
+                });
 
                 // subscribe properties to state change
                 if (props.length) {
@@ -95,15 +94,15 @@
                     listener(); // starts state binding
                 }
             },
-            dispatch: function() {
+            dispatch: function(action) {
                 var args = Array.prototype.slice.call(arguments);
                 var tag = this.is;
                 var actions = this.actions;
                 var name;
 
                 // action name
-                if (actions && typeof args[0] === 'string') {
-                    name = args.splice(0, 1);
+                if (actions && typeof action === 'string') {
+                    name = args.shift();
                     if (typeof actions[name] !== 'function') {
                         throw new TypeError('Polymer Redux: <' + tag + '> has no action "' + name + '"');
                     }
@@ -111,16 +110,14 @@
                 }
 
                 // action creator
-                if (typeof args[0] === 'function' && args[0].length === 0) {
-                    return store.dispatch(args[0]());
+                if (typeof action === 'function' && action.length === 0) {
+                    return store.dispatch(action());
                 }
 
                 // action
-                return store.dispatch(args[0]);
+                return store.dispatch(action);
             },
-            getState: function() {
-                return store.getState();
-            }
+            getState: store.getState
         };
     };
 });
