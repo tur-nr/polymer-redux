@@ -69,8 +69,8 @@
 
                 // property bindings
                 Object.keys(element.properties).forEach(function(name) {
-                    if (element.properties[name].statePath) {
-                        prop = element.properties[name];
+                    prop = element.properties[name];
+                    if (prop.hasOwnProperty("statePath")) {
                         // notify flag, warn against two-way bindings
                         if (prop.notify && !prop.readOnly) {
                             console.warn(warning, tag, name);
