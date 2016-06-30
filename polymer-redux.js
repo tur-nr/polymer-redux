@@ -19,11 +19,12 @@
                     var splices = [];
                     var value, previous;
 
-                    // statePath a path or function
-                    if (typeof property.path == 'function') {
-                        value = property.path.call(element, state);
+                    // statePath, a path or function.
+                    var path = property.path;
+                    if (typeof path == 'function') {
+                        value = path.call(element, state);
                     } else {
-                        value = Polymer.Base.get(property.path, state);
+                        value = Polymer.Base.get(path, state);
                     }
 
                     // type of array, work out splices before setting the value
@@ -69,15 +70,16 @@
 
                 // property bindings
                 Object.keys(element.properties).forEach(function(name) {
-                    if (element.properties[name].statePath) {
-                        prop = element.properties[name];
+                    prop = element.properties[name];
+                    if (prop.hasOwnProperty('statePath')) {
                         // notify flag, warn against two-way bindings
                         if (prop.notify && !prop.readOnly) {
                             console.warn(warning, tag, name);
                         }
                         props.push({
                             name: name,
-                            path: prop.statePath,
+                            // Empty statePath return state
+                            path: prop.statePath || store.getState,
                             readOnly: prop.readOnly,
                             type: prop.type
                         });
