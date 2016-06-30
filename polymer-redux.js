@@ -24,7 +24,6 @@
                     if (typeof path == 'function') {
                         value = path.call(element, state);
                     } else {
-
                         value = Polymer.Base.get(path, state);
                     }
 
@@ -72,7 +71,7 @@
                 // property bindings
                 Object.keys(element.properties).forEach(function(name) {
                     prop = element.properties[name];
-                    if (prop.hasOwnProperty("statePath")) {
+                    if (prop.hasOwnProperty('statePath')) {
                         // notify flag, warn against two-way bindings
                         if (prop.notify && !prop.readOnly) {
                             console.warn(warning, tag, name);
