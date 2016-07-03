@@ -1,12 +1,12 @@
 (function(root, factory) {
     if (typeof exports === 'object' && typeof module === 'object') {
-        module.exports = factory(require('redux'));
+        module.exports = factory();
     } else if (typeof define === 'function' && define.amd) {
-        define(['redux'], factory);
+        define(factory);
     } else {
-        root['PolymerRedux'] = factory(root.Redux);
+        root['PolymerRedux'] = factory();
     }
-})(this, function(Redux) {
+})(this, function() {
     var warning = 'Polymer Redux: <%s>.%s has "notify" enabled, two-way bindings goes against redux\'s paradigm';
 
     return function(store) {
