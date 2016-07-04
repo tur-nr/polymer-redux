@@ -109,6 +109,7 @@
     function unbindReduxListener(element) {
         if (typeof element._reduxUnsubscribe === 'function') {
             element._reduxUnsubscribe();
+            delete element._reduxUnsubscribe;
         }
     }
 

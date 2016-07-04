@@ -42,13 +42,13 @@ document.
 To bind Polymer components with Redux you must first create a ReduxBehavior
 which wraps your application's store and decorates your elements. Simply set up
 your Redux store as usual and then create the behavior with the `PolymerRedux`
-constructor passing the store.
+factory, passing the store.
 
 ```javascript
 var store = Redux.createStore(function(state, action) {
     return state;
 });
-var ReduxBehavior = new PolymerRedux(store);
+var ReduxBehavior = PolymerRedux(store);
 var MyElement = Polymer({
     is: 'my-element',
     behaviors: [ ReduxBehavior ],
@@ -145,7 +145,7 @@ Polymer({
 })
 ```
 
-Just be aware when using selectors, they are an optimisation utility. When mutating objects or arrays, be sure to return a new instance or the selector will return cached response and the element won't update. Polymer is already optimised to calculate the minimal changes to properties so you may not need selectors. 
+Just be aware when using selectors, they are an optimisation utility. When mutating objects or arrays, be sure to return a new instance or the selector will return cached response and the element won't update. Polymer is already optimised to calculate the minimal changes to properties so you may not need selectors.
 
 #### Two-way Bindings
 
