@@ -14,7 +14,7 @@
     <script>
         const sandbox = sinon.sandbox.create()
         const getState = sandbox.stub()
-        const subscribe = sandbox.stub()
+        const subscribe = sandbox.stub().returns(function() {})
         const dispatch = sandbox.stub()
         const demoAction = sandbox.stub()
         const stateFunc = sandbox.stub()
@@ -113,6 +113,7 @@
               suiteSetup(function() {
                 store.subscribe = function(fn) {
                   subscriber = fn
+                  return function() {} // unsubscriber
                 }
                 element = fixture('polymer-redux-fixture')
                 notify = sinon.spy(element, 'notifyPath')
@@ -280,17 +281,6 @@
               })
             })
 
-            suite('no properties', function() {
-              suiteSetup(function() {
-                subscribe.reset()
-                fixture('polymer-redux-noprops-fixture')
-              })
-
-              test('should not subscribe to redux store', function() {
-                sinon.assert.notCalled(subscribe)
-              })
-            })
-
             suite('state-changed event', function() {
               const state = {event: 'fired'}
               let element
@@ -300,6 +290,7 @@
                 let subscriber
                 store.subscribe = function(fn) {
                   subscriber = fn
+                  return function() {} // unsubscribe
                 }
                 element = fixture('polymer-redux-fixture')
                 fire = sinon.spy(element, 'fire')
