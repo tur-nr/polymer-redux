@@ -1,6 +1,7 @@
 # Polymer Redux
 
 [![Build Status](https://travis-ci.org/tur-nr/polymer-redux.svg?branch=master)](https://travis-ci.org/tur-nr/polymer-redux)
+[![Coverage Status](https://coveralls.io/repos/github/tur-nr/polymer-redux/badge.svg?branch=master)](https://coveralls.io/github/tur-nr/polymer-redux?branch=master)
 
 Polymer bindings for Redux. Bind store state to properties and dispatch
 actions from within Polymer Elements.
