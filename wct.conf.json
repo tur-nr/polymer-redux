@@ -2,6 +2,15 @@
   "plugins": {
     "local": {
       "browsers": ["chrome"]
+    },
+    "istanbul": {
+      "dir": "./coverage",
+      "reporters": ["text-summary", "lcov"],
+      "include": [
+        "/polymer-redux.html"
+      ],
+      "exclude": [],
+      "thresholds": {}
     }
   }
 }
