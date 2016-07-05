@@ -18,7 +18,6 @@
      */
     function createListener(element, store) {
         var props = [];
-        var prevArrays = {}; // tracks array splices
 
         // property bindings
         Object.keys(element.properties).forEach(function(name) {
@@ -54,18 +53,23 @@
                     value = Polymer.Base.get(path, state);
                 }
 
+                // prevent unnecesary polymer notifications
+                previous = element.get(property.name);
+                if(value === previous) {
+                    return;
+                }
+
                 // type of array, work out splices before setting the value
                 if (property.type === Array) {
-                    // compare the splices from a previous copy
-                    previous = prevArrays[propName] || [];
                     value = value || [];
+                    previous = previous || [];
+
                     // check the value type
                     if (!Array.isArray(value)) {
                         throw new TypeError('<%s>.%s type is Array but given: %s', element.is, propName, typeof value);
                     }
+                    
                     splices = Polymer.ArraySplice.calculateSplices(value, previous);
-                    // keep for next compare
-                    prevArrays[propName] = value.slice();
                 }
 
                 // set
