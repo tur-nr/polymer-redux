@@ -21,22 +21,24 @@
         var props = [];
 
         // property bindings
-        Object.keys(element.properties).forEach(function(name) {
-            prop = element.properties[name];
-            if (prop.hasOwnProperty('statePath')) {
-                // notify flag, warn against two-way bindings
-                if (prop.notify && !prop.readOnly) {
-                    console.warn(warning, element.is, name);
+        if (element.properties != null) {
+            Object.keys(element.properties).forEach(function(name) {
+                prop = element.properties[name];
+                if (prop.hasOwnProperty('statePath')) {
+                    // notify flag, warn against two-way bindings
+                    if (prop.notify && !prop.readOnly) {
+                        console.warn(warning, element.is, name);
+                    }
+                    props.push({
+                        name: name,
+                        // Empty statePath return state
+                        path: prop.statePath || store.getState,
+                        readOnly: prop.readOnly,
+                        type: prop.type
+                    });
                 }
-                props.push({
-                    name: name,
-                    // Empty statePath return state
-                    path: prop.statePath || store.getState,
-                    readOnly: prop.readOnly,
-                    type: prop.type
-                });
-            }
-        });
+            });
+        }
 
         // redux listener
         return function() {
