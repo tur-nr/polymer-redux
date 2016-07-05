@@ -119,11 +119,11 @@
      * dispatch.
      *
      * @param {HTMLElement} element Polymer element.
-     * @param {Array} args The arguments passed to `element.dispatch`.
      * @param {Object} store Redux store.
+     * @param {Array} args The arguments passed to `element.dispatch`.
      * @return {Object} The computed Redux action.
      */
-    function dispatchReduxAction(element, args, store) {
+    function dispatchReduxAction(element, store, args) {
         var action = args[0];
         var actions = element.actions;
 
@@ -162,7 +162,7 @@
             },
             dispatch: function() {
                 var args = Array.prototype.slice.call(arguments);
-                return dispatchReduxAction(this, args, store);
+                return dispatchReduxAction(this, store, args);
             },
             getState: store.getState
         };
