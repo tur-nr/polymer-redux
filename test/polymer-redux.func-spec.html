@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Polymer Redux Functional Specs</title>
+        <meta charset="utf-8">
+        <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+        <script src="../../web-component-tester/browser.js"></script>
+        <link rel="import" href="../polymer-redux.html">
+        <link rel="import" href="./support/redux-stub.html">
+    </head>
+    <body>
+        <test-fixture id="state-path-fixture">
+          <template>
+            <state-path></state-path>
+          </template>
+        </test-fixture>
+        <script>
+            describe('PolymerRedux', function() {
+                before(function() {
+                    var that = this;
+
+                    this.store = ReduxStub.createStore();
+
+                    // mock the redux unsubscribe
+                    this.listener = null;
+                    this.unsubscribe = sinon.spy(function() {
+                        that.listener = null;
+                    });
+
+                    // store state
+                    this.state = {
+                        name: 'foo',
+                        deep: {
+                            path: 'bar'
+                        },
+                        warn: 'baz',
+                        read: 'bax',
+                        none: 'baxx',
+                        array: []
+                    };
+                    this.store.getState.returns(this.state);
+                    // grab the internal listener from the behavior
+                    this.store.subscribe = sinon.spy(function(fn) {
+                        that.listener = fn;
+                        return that.unsubscribe;
+                    });
+                    // mock redux dispatch
+                    this.store.dispatch = sinon.spy(function(action) {
+                        that.listener();
+                    });
+
+                    // test element
+                    Polymer({
+                        is: 'state-path',
+                        behaviors: [ PolymerRedux(this.store) ],
+                        properties: {
+                            state: {
+                                type: String,
+                                statePath: ''
+                            },
+                            name: {
+                                type: String,
+                                statePath: 'name'
+                            },
+                            deepPath: {
+                                type: String,
+                                statePath: 'deep.path'
+                            },
+                            warn: {
+                                type: String,
+                                statePath: 'warn',
+                                notify: true
+                            },
+                            read: {
+                                type: String,
+                                statePath: 'read',
+                                readOnly: true
+                            },
+                            array: {
+                                type: Array,
+                                statePath: 'array'
+                            },
+                            none: {
+                                type: String
+                            }
+                        }
+                    });
+                });
+
+                describe('properties', function() {
+                    before(function() {
+                        this.warnSpy = sinon.spy(console, 'warn');
+                        this.propertyElement = fixture('state-path-fixture');
+                    });
+
+                    it('should set empty statePath to store state', function() {
+                        assert.strictEqual(this.propertyElement.state, this.state);
+                    });
+
+                    it('should set property to statePath from store', function() {
+                        assert.strictEqual(this.propertyElement.name, this.state.name);
+                    });
+
+                    it('should set property to deep statePath from store', function() {
+                        assert.strictEqual(this.propertyElement.deepPath, this.state.deep.path);
+                    });
+
+                    it('should warn againgst "notify" flag on properties', function() {
+                        sinon.assert.calledWithMatch(
+                            this.warnSpy,
+                            sinon.match.string,
+                            sinon.match(this.propertyElement.is),
+                            sinon.match('warn')
+                        );
+                    });
+
+                    it('should set "readOnly" property to statePath from store', function() {
+                        assert.strictEqual(this.propertyElement.read, this.state.read);
+                    });
+
+                    it('should not set any properties without statePath', function() {
+                        assert.notEqual(this.propertyElement.none, this.state.none);
+                    });
+
+                    describe('dispatching actions', function() {
+                        before(function() {
+                            this.dispatchElement = fixture('state-path-fixture');
+
+                            // mock reducer logic
+                            this.state.name = 'something';
+                            this.state.array = ['item'];
+
+                            this.fireEvent = sinon.spy(this.dispatchElement, 'fire');
+                            this.notifySplices = sinon.spy(this.dispatchElement, 'notifySplices');
+                            this.notifyPath = sinon.spy(this.dispatchElement, 'notifyPath');
+                            this.set = sinon.spy(this.dispatchElement, 'set');
+
+                            this.listener();
+                        });
+
+                        it('should fire the "state-changed" event', function() {
+                            sinon.assert.calledWithMatch(
+                                this.fireEvent,
+                                sinon.match('state-changed'),
+                                sinon.match.same(this.state)
+                            );
+                        });
+
+                        it('should not set properties with same values', function() {
+                            sinon.assert.neverCalledWithMatch(
+                                this.set,
+                                sinon.match('deepPath')
+                            );
+                        });
+
+                        it('should not update readonly property with same values', function() {
+                            sinon.assert.neverCalledWithMatch(
+                                this.notifyPath,
+                                sinon.match('read')
+                            );
+                        });
+
+                        it('should notify on array splices update', function() {
+                            sinon.assert.calledWithMatch(
+                                this.notifySplices,
+                                sinon.match('array'),
+                                sinon.match.array
+                            );
+                        });
+
+                        it('should throw error if calculating array splices with non-array', function() {
+                            fixture('state-path-fixture');
+                            this.state.array = 'string';
+                            assert.throws(this.listener, /<state-path>\.array type is Array but given: string/);
+                        });
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

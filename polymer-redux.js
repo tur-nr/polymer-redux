@@ -58,20 +58,22 @@
 
                 // prevent unnecesary polymer notifications
                 previous = element.get(property.name);
-                if(value === previous) {
+                if (value === previous) {
                     return;
                 }
 
                 // type of array, work out splices before setting the value
                 if (property.type === Array) {
-                    value = value || [];
-                    previous = previous || [];
+                    value = value || /* istanbul ignore next */ [];
+                    previous = previous || /* istanbul ignore next */ [];
 
                     // check the value type
                     if (!Array.isArray(value)) {
-                        throw new TypeError('<%s>.%s type is Array but given: %s', element.is, propName, typeof value);
+                        throw new TypeError(
+                            '<'+ element.is +'>.'+ propName +' type is Array but given: ' + (typeof value)
+                        );
                     }
-                    
+
                     splices = Polymer.ArraySplice.calculateSplices(value, previous);
                 }
 
