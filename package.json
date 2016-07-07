@@ -5,7 +5,8 @@
   "main": "polymer-redux.js",
   "scripts": {
     "postinstall": "bower install",
-    "test": "gulp test"
+    "test": "gulp test",
+    "lint": "polylint"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
     "bower": "^1.5.2",
     "coveralls": "^2.11.9",
     "gulp": "^3.9.1",
+    "polylint": "^2.10.1",
     "polymer-cli": "^0.11.1",
     "redux": "^3.0.5",
     "reselect": "^2.5.1",
