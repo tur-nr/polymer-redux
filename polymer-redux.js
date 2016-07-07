@@ -153,27 +153,65 @@
         return store.dispatch(action);
     }
 
+    /**
+     * Creates PolymerRedux behaviors from a given Redux store.
+     *
+     * @param {Object} store Redux store.
+     * @return {PolymerRedux}
+     */
     return function(store) {
+        var PolymerRedux;
+
         // check for store
         if (!store) {
             throw new TypeError('missing redux store');
         }
 
-        return {
+        /**
+         * `PolymerRedux` binds a given Redux store's state to implementing Elements.
+         *
+         * Full documentation available, https://github.com/tur-nr/polymer-redux.
+         *
+         * @polymerBehavior PolymerRedux
+         * @demo demo/index.html
+         */
+        return PolymerRedux = {
+            /**
+             * Fired when the Redux store state changes.
+             * @event state-changed
+             * @param {*} state
+             */
+
             ready: function() {
                 bindReduxListener(this, store);
             },
+
             attached: function() {
                 bindReduxListener(this, store);
             },
+
             detached: function() {
                 unbindReduxListener(this);
             },
-            dispatch: function() {
+
+            /**
+             * Dispatches an action to the Redux store.
+             *
+             * @param {String|Object|Function} action
+             * @return {Object} The action that was dispatched.
+             */
+            dispatch: function(action /*, [...args] */) {
                 var args = Array.prototype.slice.call(arguments);
                 return dispatchReduxAction(this, store, args);
             },
-            getState: store.getState
+
+            /**
+             * Gets the current state in the Redux store.
+             * @return {*}
+             */
+            getState: function() {
+                return store.getState();
+            },
         };
     };
 });
