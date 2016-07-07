@@ -24,27 +24,32 @@
           <!-- redux setup -->
           <script>
             const reducer = (state, action) => {
-              if (!state) return { friends: [] }
+              if (!state) return { friends: [] };
+
+              // copy friends list
+              friends = state.friends.slice(0);
 
               switch (action.type) {
                 case 'ADD_FRIEND':
-                  state.friends.push(action.friend)
-                  break
+                  friends.push(action.friend);
+                  break;
                 case 'REMOVE_FRIEND':
-                  const idx = state.friends.indexOf(action.friend)
+                  const idx = friends.indexOf(action.friend)
                   if (idx !== -1) {
-                      state.friends.splice(idx, 1)
+                      friends.splice(idx, 1)
                   }
-                  break
+                  break;
                 case 'SORT_FRIENDS':
-                  state.friends.sort()
-                  break
+                  friends.sort()
+                  break;
               }
 
-              return state
+              state.friends = friends;
+
+              return state;
             }
-            const store = Redux.createStore(reducer)
-            const ReduxBehavior = PolymerRedux(store)
+            const store = Redux.createStore(reducer);
+            const ReduxBehavior = PolymerRedux(store);
           </script>
 
           <!-- friends list module -->
@@ -98,25 +103,25 @@
                 },
               },
               addFriend: function() {
-                const input = this.$['friend-name']
+                const input = this.$['friend-name'];
                 if (input.value) {
-                  this.dispatch('add', input.value)
-                  input.value = ''
-                  input.focus()
+                  this.dispatch('add', input.value);
+                  input.value = '';
+                  input.focus();
                 }
               },
               removeFriend: function(event) {
-                this.dispatch('remove', event.model.item)
+                this.dispatch('remove', event.model.item);
               },
               sortFriends: function() {
-                this.dispatch('sort')
+                this.dispatch('sort');
               },
               canSortFriends: function(length) {
-                return length > 1
+                return length > 1;
               },
               handleKeypress: function(event) {
                 if (event.charCode === 13) {
-                  this.addFriend()
+                  this.addFriend();
                 }
               }
             });

@@ -5,8 +5,7 @@
   "main": "polymer-redux.js",
   "scripts": {
     "postinstall": "bower install",
-    "test": "gulp test",
-    "cover": "cat coverage/lcov.info | coveralls"
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
