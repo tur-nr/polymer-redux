@@ -156,7 +156,7 @@
     /**
      * Creates PolymerRedux behaviors from a given Redux store.
      *
-     * @param {object} store Redux store.
+     * @param {Object} store Redux store.
      * @return {PolymerRedux}
      */
     return function(store) {
@@ -197,8 +197,8 @@
             /**
              * Dispatches an action to the Redux store.
              *
-             * @param {string|object|function} action
-             * @return {object} The action that was dispatched.
+             * @param {String|Object|Function} action
+             * @return {Object} The action that was dispatched.
              */
             dispatch: function(action /*, [...args] */) {
                 var args = Array.prototype.slice.call(arguments);
