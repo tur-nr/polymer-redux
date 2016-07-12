@@ -23,7 +23,7 @@
         // property bindings
         if (element.properties != null) {
             Object.keys(element.properties).forEach(function(name) {
-                prop = element.properties[name];
+                var prop = element.properties[name];
                 if (prop.hasOwnProperty('statePath')) {
                     // notify flag, warn against two-way bindings
                     if (prop.notify && !prop.readOnly) {
