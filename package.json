@@ -32,7 +32,7 @@
     "polymer-cli": "^0.11.1",
     "redux": "^3.0.5",
     "reselect": "^2.5.1",
-    "web-component-tester": "^4.2.2",
+    "web-component-tester": "~4.2.2",
     "web-component-tester-istanbul": "https://github.com/t2ym/web-component-tester-istanbul/tarball/0.10.1"
   }
 }
