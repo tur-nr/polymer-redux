@@ -7,7 +7,7 @@
       "dir": "./coverage",
       "reporters": ["text-summary", "lcov"],
       "include": [
-        "/polymer-redux.js"
+        "/lib/polymer-redux.js"
       ],
       "exclude": [],
       "thresholds": {}
