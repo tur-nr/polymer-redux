@@ -10,7 +10,159 @@
 </head>
 <body>
     <script>
-        
+        const store = Redux.createStore((state, action) => {
+            if (!state) {
+                return {
+                    name: '',
+                    todos: []
+                }
+            }
+
+            const result = Object.assign({}, state);
+
+            switch (action.type) {
+                case 'NAME_CHANGE':
+                    result.name = action.name;
+                    break;
+
+                case 'ADD_TODO':
+                    result.todos = [
+                        ...result.todos,
+                        action.todo
+                    ];
+                    break;
+
+                case 'REMOVE_TODO':
+                    result.todos = result.todos.filter((todo) => {
+                        return action.todo !== todo;
+                    });
+                    break;
+            }
+
+            return result;
+        });
+        window.ReduxMixin = PolymerRedux(store);
+    </script>
+
+    <dom-module id="todo-app">
+        <template>
+            <todo-heading name="[[name]]"></todo-heading>
+            <todo-list todos="[[todos]]"></todo-list>
+        </template>
+        <script>
+            class TodoApp extends ReduxMixin(Polymer.Element) {
+                static get is() {
+                    return 'todo-app';
+                }
+
+                static get config() {
+                    return {
+                        properties: {
+                            name: {
+                                type: String,
+                                statePath: 'name'
+                            },
+                            todos: {
+                                type: String,
+                                statePath: 'todos'
+                            }
+                        }
+                    };
+                }
+            }
+
+            customElements.define(TodoApp.is, TodoApp);
+        </script>
+    </dom-module>
+
+    <dom-module id="todo-heading">
+        <template>
+            <h1>[[name]] Todo List</h1>
+        </template>
+        <script>
+            class TodoHeading extends Polymer.Element {
+                static get is() {
+                    return 'todo-heading';
+                }
+
+                static get config() {
+                    return {
+                        properties: {
+                            name: String
+                        }
+                    }
+                }
+            }
+
+            customElements.define(TodoHeading.is, TodoHeading);
+        </script>
+    </dom-module>
+
+    <dom-module id="todo-list">
+        <template>
+            <ul>
+                <template is="dom-repeat" items="[[todos]]">
+                    <todo-item item="[[item]]"></todo-item>
+                </template>
+            </ul>
+        </template>
+        <script>
+            class TodoList extends Polymer.Element {
+                static get is() {
+                    return 'todo-list';
+                }
+
+                static get config() {
+                    return {
+                        properties: {
+                            todos: Array
+                        }
+                    }
+                }
+            }
+
+            customElements.define(TodoList.is, TodoList);
+        </script>
+    </dom-module>
+
+    <dom-module id="todo-item">
+        <template>
+            <li on-click="remove">[[item.label]]</li>
+        </template>
+        <script>
+            class TodoItem extends ReduxMixin(Polymer.Element) {
+                static get is() {
+                    return 'todo-item';
+                }
+
+                static get config() {
+                    return {
+                        properties: {
+                            item: Object
+                        }
+                    }
+                }
+
+                remove() {
+                    this.dispatch({
+                        type: 'REMOVE_TODO',
+                        todo: this.item
+                    });
+                }
+            }
+
+            customElements.define(TodoItem.is, TodoItem);
+        </script>
+    </dom-module>
+
+    <todo-app></todo-app>
+
+    <script>
+        const name = prompt('Please enter your name:');
+        store.dispatch({
+            name,
+            type: 'NAME_CHANGE'
+        });
     </script>
 </body>
 </html>
