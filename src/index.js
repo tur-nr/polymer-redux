@@ -87,7 +87,23 @@ export default (store) => {
     return (parent) => class extends parent {
         constructor() {
             super()
+            this._bindPropertiesToReduxStore()
+        }
 
+        connectedCallback() {
+            this._bindPropertiesToReduxStore()
+        }
+
+        disconnectedCallback() {
+            unbind(this)
+        }
+
+        /**
+         * Binds properties of element to the Redux store.
+         *
+         * @private
+         */
+        _bindPropertiesToReduxStore() {
             // bind properties
             const config = this.constructor.config
             const properties = config && config.properties
