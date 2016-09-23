@@ -2,9 +2,13 @@
   "name": "polymer-redux",
   "version": "0.1.0",
   "description": "Polymer bindings for Redux.",
-  "main": "polymer-redux.js",
+  "main": "lib/polymer-redux.js",
   "scripts": {
-    "test": "gulp test",
+    "build:lib": "babel -d lib src",
+    "build:dist": "rollup -f umd -n PolymerRedux -o dist/polymer-redux.js lib/polymer-redux.js",
+    "build:min": "uglifyjs -m -c -o dist/polymer-redux.min.js dist/polymer-redux.js",
+    "build": "npm run build:lib && npm run build:dist && npm run build:min",
+    "test": "wct",
     "lint": "polylint"
   },
   "repository": {
@@ -14,9 +18,9 @@
   "keywords": [
     "redux",
     "polymer",
-    "web",
-    "component",
-    "state"
+    "reducer",
+    "state",
+    "web-components"
   ],
   "author": "Christopher Turner <turner296@gmail.com>",
   "license": "MIT",
@@ -25,13 +29,16 @@
   },
   "homepage": "https://github.com/tur-nr/polymer-redux#readme",
   "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-stage-1": "^6.13.0",
     "bower": "^1.5.2",
     "coveralls": "^2.11.9",
-    "gulp": "^3.9.1",
     "polylint": "^2.10.1",
     "polymer-cli": "^0.11.1",
     "redux": "^3.0.5",
     "reselect": "^2.5.1",
+    "rollup": "^0.36.0",
     "web-component-tester": "~4.2.2",
     "web-component-tester-istanbul": "https://github.com/t2ym/web-component-tester-istanbul/tarball/0.10.1"
   }

@@ -13,9 +13,9 @@
   "keywords": [
     "redux",
     "polymer",
-    "web",
-    "component",
-    "reducer"
+    "reducer",
+    "state",
+    "web-components"
   ],
   "license": "MIT",
   "homepage": "https://github.com/tur-nr/polymer-redux",
