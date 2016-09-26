@@ -27,7 +27,7 @@ export default function(store) {
         const bindings = Object.keys(properties)
             .filter((name) => {
                 const property = properties[name]
-                if (property.hasOwnProperty('statePath') {
+                if (property.hasOwnProperty('statePath')) {
                     if (!property.readOnly && property.notify) {
                         console.warn(`PolymerRedux: <${element.constructor.is}>.${name} has "notify" enabled, two-way bindings goes against Redux's paradigm`)
                     }

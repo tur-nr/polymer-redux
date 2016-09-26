@@ -2,6 +2,5 @@ bower_components
 coverage
 node_modules
 lib
-dist
 .idea
 *.log
