@@ -6,7 +6,7 @@
  * @param {Object} store Redux store.
  * @return {Function} Class mixin.
  */
-export default (store) => {
+export default function(store) {
     const subscribers = new Map()
 
     /**
@@ -60,7 +60,7 @@ export default (store) => {
 
         subscribers.set(element, unsubscribe)
 
-        return update
+        return update(store.getState())
     }
 
     /**
@@ -91,10 +91,12 @@ export default (store) => {
         }
 
         connectedCallback() {
+            super.connectedCallback()
             this._bindPropertiesToReduxStore()
         }
 
         disconnectedCallback() {
+            super.disconnectedCallback()
             unbind(this)
         }
 
@@ -107,18 +109,7 @@ export default (store) => {
             // bind properties
             const config = this.constructor.config
             const properties = config && config.properties
-            const update = bind(this, properties || {})
-
-            update(store.getState()) // init
-        }
-
-        /**
-         * Returns the Redux store's current state.
-         *
-         * @return {*}
-         */
-        getState() {
-            return store.getState()
+            bind(this, properties || {})
         }
 
         /**

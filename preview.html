@@ -46,7 +46,7 @@
 
     <dom-module id="todo-app">
         <template>
-            <todo-heading name="[[name]]"></todo-heading>
+            <todo-header name="[[name]]"></todo-header>
             <todo-list todos="[[todos]]"></todo-list>
         </template>
         <script>
@@ -69,20 +69,28 @@
                         }
                     };
                 }
+
+                connectedCallback() {
+                    super.connectedCallback();
+                    this.dispatch({
+                        name: prompt('Please enter your name:'),
+                        type: 'NAME_CHANGE'
+                    })
+                }
             }
 
             customElements.define(TodoApp.is, TodoApp);
         </script>
     </dom-module>
 
-    <dom-module id="todo-heading">
+    <dom-module id="todo-header">
         <template>
             <h1>[[name]] Todo List</h1>
         </template>
         <script>
-            class TodoHeading extends Polymer.Element {
+            class TodoHeader extends Polymer.Element {
                 static get is() {
-                    return 'todo-heading';
+                    return 'todo-header';
                 }
 
                 static get config() {
@@ -94,7 +102,7 @@
                 }
             }
 
-            customElements.define(TodoHeading.is, TodoHeading);
+            customElements.define(TodoHeader.is, TodoHeader);
         </script>
     </dom-module>
 
@@ -156,13 +164,5 @@
     </dom-module>
 
     <todo-app></todo-app>
-
-    <script>
-        const name = prompt('Please enter your name:');
-        store.dispatch({
-            name,
-            type: 'NAME_CHANGE'
-        });
-    </script>
 </body>
 </html>
