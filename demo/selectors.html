@@ -41,16 +41,7 @@
                   })
                   break
                 case 'REMOVE_FRIEND':
-                  let idx = -1
-                  state.friends.some((friend, i) => {
-                    if (action.friend === friend.name) {
-                      idx = i
-                      return true
-                    }
-                  })
-                  if (idx !== -1) {
-                      state.friends.splice(idx, 1)
-                  }
+                  state.friends = state.friends.filter(f => f !== action.friend)
                   break
                 case 'SORT_FRIENDS':
                   state.friends.sort((a, b) => {
@@ -70,7 +61,7 @@
               return state
             }
             const store = Redux.createStore(reducer)
-            const ReduxBehavior = PolymerRedux(store)
+            const ReduxMixin = PolymerRedux(store)
 
             // selectors
             const getBffs = state => state.bffs
@@ -85,71 +76,111 @@
             )
           </script>
 
+          <!-- friends item module -->
+          <dom-module id="friend-item">
+            <template>
+              <li>
+                <span>[[friend.name]]</span>
+                <dom-if if="[[friend.best]]">
+                  <template>
+                    <i>*bff</i>
+                  </template>
+                </dom-if>
+                <button on-click="remove">Remove</button>
+              </li>
+            </template>
+            <script>
+              class FriendItem extends ReduxMixin(Polymer.Element) {
+                static get is() {
+                  return 'friend-item'
+                }
+
+                static get config() {
+                  return {
+                    properties: {
+                      friend: Object
+                    },
+                    actions: {
+                      remove(friend) {
+                        return {
+                          type: 'REMOVE_FRIEND',
+                          friend
+                        }
+                      }
+                    }
+                  }
+                }
+
+                remove() {
+                  this.dispatch('remove', this.friend)
+                }
+              }
+              customElements.define(FriendItem.is, FriendItem)
+            </script>
+          </dom-module>
+
           <!-- friends list module -->
           <dom-module id="friends-list">
             <template>
               <p>
                 <span>You have [[friends.length]] friend(s).</span>
                 <button on-click="toggleBffs">Show/Hide BFFs</button>
-                <template is="dom-if" if="[[canSortFriends(friends.length)]]">
-                  <button on-click="sortFriends">Sort Friends</button>
+                <template is="dom-if" if="[[canSort(friends.length)]]">
+                  <button on-click="sort">Sort Friends</button>
                 </template>
               </p>
               <ul>
-                <template is="dom-repeat" items="[[friends]]">
-                  <li>
-                    <span>[[item.name]]</span>
-                    <template is="dom-if" if="[[item.best]]">
-                      <i>*bff</i>
-                    </template>
-                    <button on-click="removeFriend">Remove</button>
-                  </li>
-                </template>
+                <dom-repeat items="[[friends]]">
+                  <template>
+                    <friend-item friend="[[item]]"></friend-item>
+                  </template>
+                </dom-repeat>
               </ul>
               <input id="friend-name" placeholder="Name" on-keypress="handleKeypress">
               <label for="bff">
                 <input id="bff" type="checkbox">
                 <span>BFF</span>
               </label>
-              <button on-click="addFriend">Add Friend</button>
+              <button on-click="add">Add Friend</button>
             </template>
           </dom-module>
           <script>
-            Polymer({
-              is: 'friends-list',
-              behaviors: [ ReduxBehavior ],
-              properties: {
-                friends: {
-                  type: Array,
-                  statePath: friendsSelector
-                }
-              },
-              actions: {
-                add: function(friend, bff) {
-                  return {
-                    type: 'ADD_FRIEND',
-                    friend,
-                    bff
-                  };
-                },
-                remove: function(friend) {
-                  return {
-                    type: 'REMOVE_FRIEND',
-                    friend
-                  };
-                },
-                sort: function() {
-                  return {
-                    type: 'SORT_FRIENDS'
-                  };
-                },
-                toggleBff: function(filter) {
-                  return {
-                    type: 'TOGGLE_BFF'
+            class FriendsList extends ReduxMixin(Polymer.Element) {
+              static get is() {
+                return 'friends-list'
+              }
+
+              static get config() {
+                return {
+                  properties: {
+                    friends: {
+                      type: Array,
+                      statePath: friendsSelector
+                    }
+                  },
+                  actions: {
+                    add(friend, bff) {
+                      return {
+                        type: 'ADD_FRIEND',
+                        friend,
+                        bff
+                      }
+                    },
+                    sort: function() {
+                      return {
+                        type: 'SORT_FRIENDS'
+                      }
+                    },
+                    toggleBff: function(filter) {
+                      return {
+                        type: 'TOGGLE_BFF'
+                      }
+                    }
                   }
                 }
-              },
-              addFriend: function() {
+              }
+
+              add() {
                 const input = this.$['friend-name']
                 const checkbox = this.$['bff']
                 if (input.value) {
@@ -158,25 +189,27 @@
                   checkbox.checked = false
                   input.focus()
                 }
-              },
-              removeFriend: function(event) {
-                this.dispatch('remove', event.model.item.name)
-              },
-              sortFriends: function() {
+              }
+
+              sort() {
                 this.dispatch('sort')
-              },
-              canSortFriends: function(length) {
+              }
+
+              canSort(length) {
                 return length > 1
-              },
-              handleKeypress: function(event) {
+              }
+
+              handleKeypress(event) {
                 if (event.charCode === 13) {
-                  this.addFriend()
+                  this.add()
                 }
-              },
-              toggleBffs: function() {
+              }
+
+              toggleBffs() {
                 this.dispatch('toggleBff')
               }
-            })
+            }
+            customElements.define(FriendsList.is, FriendsList)
           </script>
 
           <!-- demo -->
