@@ -1,7 +1,7 @@
 # Polymer Redux
 
-[![Build Status](https://travis-ci.org/tur-nr/polymer-redux.svg?branch=master)](https://travis-ci.org/tur-nr/polymer-redux)
-[![Coverage Status](https://coveralls.io/repos/github/tur-nr/polymer-redux/badge.svg?branch=master)](https://coveralls.io/github/tur-nr/polymer-redux?branch=master)
+[![Build Status](https://travis-ci.org/tur-nr/polymer-redux.svg?branch=polymer-2)](https://travis-ci.org/tur-nr/polymer-redux)
+[![Coverage Status](https://coveralls.io/repos/github/tur-nr/polymer-redux/badge.svg?branch=polymer-2)](https://coveralls.io/github/tur-nr/polymer-redux?branch=polymer-2)
 
 Polymer bindings for Redux. Bind store state to properties and dispatch
 actions from within Polymer Elements.
@@ -15,7 +15,7 @@ with Polymer to be more focused on functionality than the applications state.
 ## Installation
 
 ```bash
-bower install --save polymer-redux
+bower install --save polymer-redux#polymer-2
 ```
 
 ## Usage
@@ -28,7 +28,7 @@ document.
 ```html
 <html>
     <head>
-        <script src="./bower_components/webcomponentsjs/webcomponents.js"></script>
+        <script src="./bower_components/webcomponentsjs/webcomponents-lite.js"></script>
         <script src="./node_modules/redux/dist/redux.js"></script>
         <link rel="import" href="./bower_components/polymer-redux/polymer-redux.html">
     </head>
@@ -40,23 +40,25 @@ document.
 
 ### Setup
 
-To bind Polymer components with Redux you must first create a ReduxBehavior
-which wraps your application's store and decorates your elements. Simply set up
-your Redux store as usual and then create the behavior with the `PolymerRedux`
-factory, passing the store.
+To bind Polymer components with Redux you must first create a ReduxMixin which
+binds your application's store to any Element passed in. Simply set up your
+Redux store as usual and then create the class mixin with the `PolymerRedux`
+factory passing the store.
 
 ```javascript
-var store = Redux.createStore(function(state, action) {
-    return state;
-});
-var ReduxBehavior = PolymerRedux(store);
-var MyElement = Polymer({
-    is: 'my-element',
-    behaviors: [ ReduxBehavior ],
-    created: function() {
-        var state = this.getState();
+const store = Redux.createStore((state = {}, action) => state)
+const ReduxMixin = PolymerRedux(store)
+class MyElement extends ReduxMixin(Polymer.Element) {
+    static get is() {
+        return 'my-element'
     }
-});
+
+    connectedCallback() {
+        super.connectedCallback();
+        const state = this.getState();
+    }
+}
+customElements.define(MyElement.is, MyElement)
 ```
 Now `MyElement` has a connection to the Redux store and can bind properties to
 it's state and dispatch actions.
@@ -64,20 +66,22 @@ it's state and dispatch actions.
 ### Binding Properties
 
 Polymer Redux binds state to the components properties. This binding happens on
-the `created` callback. To bind a property to a value in the state set the
+`connectedCallback`. To bind a property to a value in the state set the
 `statePath` key when defining properties in Polymer.
 
 ```javascript
-Polymer({
-    is: 'my-element',
-    behaviors: [ ReduxBehavior ],
-    properties: {
-        message: {
-            type: String,
-            statePath: 'message'
+class MyElement extends ReduxMixin(Polymer.Element) {
+    static get config() {
+        return {
+            properties: {
+                message: {
+                    type: String,
+                    statePath: 'message'
+                }
+            }
         }
     }
-});
+}
 ```
 
 `<MyElement>.message` is now bound to the value of `message` in the state.
@@ -85,7 +89,7 @@ Whenever the store state changes so to will the properties of the element.
 
 #### Dot Notation
 
-Binding properties this way makes use of [`Polymer.Base.get()`](http://polymer.github.io/polymer/) method, so you can use dot notation paths like so: `'user.firstName'`.
+Binding properties this way makes use of [`Polymer.Path.get()`](http://polymer.github.io/polymer/) method, so you can use dot notation paths like so: `'user.firstName'`.
 
 
 #### Dynamic Bindings
@@ -109,16 +113,20 @@ To create a Polymer element that allows you to edit a todo from the `todosById` 
 To allow these use cases the `statePath` can also take a `Function` instead of a `String`. The function will be called and the `state` will be passed into it as a parameter:
 
 ```javascript
-Polymer({
-    is: 'my-element',
-    behaviors: [ ReduxBehavior ],
-    properties: {
-        todo: {
-            type: String,
-            statePath: function(state) { return state.todosById[state.todoToEdit] }
+class MyElement extends ReduxMixin(Polymer.Element) {
+    static get config() {
+        return {
+            properties: {
+                message: {
+                    type: String,
+                    statePath(state) {
+                        return state.todosById[state.todoToEdit]
+                    }
+                }
+            }
         }
     }
-});
+}
 ```
 
 ##### Selectors
@@ -136,14 +144,18 @@ const editTodoSelector = Reselect.createSelector(
         return state.todosById[id];
     }
 );
-Polymer({
-    properties: {
-        todo: {
-            type: String,
-            statePath: editTodoSelector
+class MyElement extends ReduxMixin(Polymer.Element) {
+    static get config() {
+        return {
+            properties: {
+                message: {
+                    type: String,
+                    statePath: editTodoSelector
+                }
+            }
         }
     }
-})
+}
 ```
 
 Just be aware when using selectors, they are an optimisation utility. When mutating objects or arrays, be sure to return a new instance or the selector will return cached response and the element won't update. Polymer is already optimised to calculate the minimal changes to properties so you may not need selectors.
@@ -160,38 +172,25 @@ binding via the `notify` flag. If the properties flagged with `notify` and have
 For an easier and semantic way to dispatch actions against the store, is to create a list of actions the component can trigger. Adding a list of functions to the `actions` property, exposes them to the `dispatch()` method of the element.
 
 ```javascript
-Polymer({
-    actions: {
-        setName: function(first, last) {
-            return {
-                type: 'SET_NAME',
-                first: first,
-                last: last
-            };
+class MyElement extends ReduxMixin(Polymer.Element) {
+    static get config() {
+        return {
+            actions: {
+                setName(first, last) {
+                    return {
+                        type: 'SET_NAME',
+                        first,
+                        last
+                    }
+                }
+            }
         }
-    },
-    handleClick: function() {
+    }
+
+    handleClick() {
         return this.dispatch('setName', 'James', 'Bond');
     }
-});
-```
-
-`dispatch()` also takes a function that returns an action object. This function must have a length of zero, otherwise it will pass the function to Redux as middleware function. Or you may use the standard Redux way of dispatching.
-
-```javascript
-Polymer({
-    handleClick: function() {
-        this.dispatch(function() { // !!! ZERO LENGTH !!!
-            return {
-               type: 'ACTION'
-            };
-        });
-        // or the standard redux way
-        this.dispatch({
-            type: 'ACTION'
-        });
-    }
-});
+}
 ```
 
 #### Dispatching Async Actions
@@ -199,17 +198,17 @@ Polymer({
 When you need to dispatch Async with [redux-thunk](https://github.com/gaearon/redux-thunk) actions it is good practice to use `dispatch()` like so.
 
 ```javascript
-Polymer({
-    handleClick: function() {
-        this.dispatch(function(dispatch) {
-            dispatch({ type: 'REQUEST_STARTED' });
+class MyElement extends ReduxMixin(Polymer.Element) {
+    handleClick() {
+        return this.dispatch((dispatch) => {
+            dispatch({ type: 'REQUEST_STARTED' })
             // do async task
             setTimeout(function() {
                 dispatch({ type: 'REQUEST_ENDED' })
-            }, 1000);
-        });
+            }, 1000)
+        })
     }
-})
+}
 ```
 
 ## API
@@ -220,9 +219,9 @@ Polymer({
 
 * `store` Object, Redux store.
 
-Returns a `ReduxBehavior` object.
+Returns a `ReduxMixin` function.
 
-#### Redux Behavior
+#### Redux Mixin
 
 These methods are available on the instance of the component, the element.
 
@@ -240,18 +239,7 @@ Returns the action object.
 
 ##### `#dispatch(<fn>)`
 
-* `fn` Function, returning action object.
-
-`fn` must be of length zero to use `#dispatch()` this way.
-
-Returns the action object.
-
-
-##### `#dispatch(<fn>)`
-
-* `fn` Function, returning action object.
-
-`fn` must have at least a length of one to use `#dispatch` as a middleware.
+* `fn` Function, Redux middleware dispatch function.
 
 Returns the action object.
 
