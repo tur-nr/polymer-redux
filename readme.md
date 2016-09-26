@@ -12,6 +12,12 @@ libraries together allows developers to create powerful and complex
 applications faster and simpler. This approach allows the components you build
 with Polymer to be more focused on functionality than the applications state.
 
+## Polymer 2.0 Preview
+
+The Polymer team have released a preview of it's next major update, [Polymer 2.0](https://www.polymer-project.org/1.0/blog/2016-09-09-polymer-2.0). With this update comes a cleaner interface for setting properties on elements which is perfect for state management libraries like Redux.
+
+Checkout [`polymer-2`](https://github.com/tur-nr/polymer-redux/tree/polymer-2) branch to have a play with PolymerRedux and Polymer 2.0.
+
 ## Installation
 
 ```bash
@@ -176,7 +182,7 @@ Polymer({
 });
 ```
 
-`dispatch()` also takes a function that returns an action object. This function must have a length of zero, otherwise it will pass the function to Redux as middleware function. Or you may use the standard Redux way of dispatching.
+~~`dispatch()` also takes a function that returns an action object. This function must have a length of zero, otherwise it will pass the function to Redux as middleware function. Or you may use the standard Redux way of dispatching.~~
 
 ```javascript
 Polymer({
@@ -238,13 +244,13 @@ Returns current store's state.
 Returns the action object.
 
 
-##### `#dispatch(<fn>)`
+##### ~~`#dispatch(<fn>)`~~
 
-* `fn` Function, returning action object.
+* ~~`fn` Function, returning action object.~~
 
-`fn` must be of length zero to use `#dispatch()` this way.
+~~`fn` must be of length zero to use `#dispatch()` this way.~~
 
-Returns the action object.
+~~Returns the action object.~~
 
 
 ##### `#dispatch(<fn>)`
