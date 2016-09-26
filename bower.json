@@ -28,5 +28,8 @@
   ],
   "dependencies": {
     "polymer": "2.0-preview"
+  },
+  "devDependencies": {
+    "iron-demo-helpers": "2.0-preview"
   }
 }

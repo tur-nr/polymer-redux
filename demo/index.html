@@ -49,83 +49,120 @@
               return state;
             }
             const store = Redux.createStore(reducer);
-            const ReduxBehavior = PolymerRedux(store);
+            const ReduxMixin = PolymerRedux(store);
           </script>
 
           <!-- friends list module -->
+          <dom-module id="friend-item">
+            <template>
+              <li>
+                <span>[[name]]</span>
+                <button on-click="remove">Remove</button>
+              </li>
+            </template>
+            <script>
+              class FriendItem extends ReduxMixin(Polymer.Element) {
+                static get is() {
+                  return 'friend-item'
+                }
+
+                static get config() {
+                  return {
+                    properties: {
+                      name: String
+                    }
+                  }
+                }
+
+                remove() {
+                  this.dispatch({
+                    type: 'REMOVE_FRIEND',
+                    friend: this.name
+                  })
+                }
+              }
+
+              customElements.define(FriendItem.is, FriendItem)
+            </script>
+          </dom-module>
+
           <dom-module id="friends-list">
             <template>
               <p>
                 <span>You have [[friends.length]] friend(s).</span>
-                <template is="dom-if" if="[[canSortFriends(friends.length)]]">
-                  <button on-click="sortFriends">Sort Friends</button>
-                </template>
+                <dom-if if="[[canSortFriends(friends.length)]]">
+                  <template>
+                    <button on-click="sortFriends">Sort Friends</button>
+                  </template>
+                </dom-if>
               </p>
               <ul>
-                <template is="dom-repeat" items="[[friends]]">
-                  <li>
-                    <span>[[item]]</span>
-                    <button on-click="removeFriend">Remove</button>
-                  </li>
-                </template>
+                <dom-repeat items="[[friends]]">
+                  <template>
+                    <friend-item name="[[item]]"></friend-item>
+                  </template>
+                </dom-repeat>
               </ul>
               <input id="friend-name" placeholder="Name" on-keypress="handleKeypress">
               <button on-click="addFriend">Add Friend</button>
             </template>
-          </dom-module>
-          <script>
-            Polymer({
-              is: 'friends-list',
-              behaviors: [ ReduxBehavior ],
-              properties: {
-                friends: {
-                  type: Array,
-                  statePath: 'friends'
+            <script>
+              class FriendsList extends ReduxMixin(Polymer.Element) {
+                static get is() {
+                  return 'friends-list'
                 }
-              },
-              actions: {
-                add: function(name) {
+
+                static get config() {
                   return {
-                    type: 'ADD_FRIEND',
-                    friend: name
-                  };
-                },
-                remove: function(name) {
-                  return {
-                    type: 'REMOVE_FRIEND',
-                    friend: name
-                  };
-                },
-                sort: function() {
-                  return {
-                    type: 'SORT_FRIENDS'
-                  };
-                },
-              },
-              addFriend: function() {
-                const input = this.$['friend-name'];
-                if (input.value) {
-                  this.dispatch('add', input.value);
-                  input.value = '';
-                  input.focus();
+                    properties: {
+                      friends: {
+                        type: Array,
+                        statePath: 'friends'
+                      }
+                    },
+                    actions: {
+                      add(name) {
+                        return {
+                          type: 'ADD_FRIEND',
+                          friend: name
+                        }
+                      },
+                      sort() {
+                        return {
+                          type: 'SORT_FRIENDS'
+                        }
+                      }
+                    }
+                  }
                 }
-              },
-              removeFriend: function(event) {
-                this.dispatch('remove', event.model.item);
-              },
-              sortFriends: function() {
-                this.dispatch('sort');
-              },
-              canSortFriends: function(length) {
-                return length > 1;
-              },
-              handleKeypress: function(event) {
-                if (event.charCode === 13) {
-                  this.addFriend();
+
+                addFriend() {
+                  const input = this.$['friend-name'];
+                  if (input.value) {
+                    this.dispatch('add', input.value);
+                    input.value = '';
+                    input.focus();
+                  }
+                }
+
+                sortFriends() {
+                  this.dispatch('sort');
+                }
+
+                canSortFriends(length) {
+                  return length > 1;
+                }
+
+                handleKeypress(event) {
+                  if (event.charCode === 13) {
+                    this.addFriend();
+                  }
                 }
               }
-            });
-          </script>
+
+              customElements.define(FriendsList.is, FriendsList)
+            </script>
+          </dom-module>
 
           <!-- demo -->
           <friends-list></friends-list>
