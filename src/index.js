@@ -85,31 +85,18 @@ export default function(store) {
      * @return {Function} PolymerRedux mixed class.
      */
     return (parent) => class extends parent {
-        constructor() {
-            super()
-            this._bindPropertiesToReduxStore()
-        }
-
         connectedCallback() {
             super.connectedCallback()
-            this._bindPropertiesToReduxStore()
+
+            const config = this.constructor.config
+            const properties = config && config.properties
+
+            bind(this, properties || {})
         }
 
         disconnectedCallback() {
             super.disconnectedCallback()
             unbind(this)
-        }
-
-        /**
-         * Binds properties of element to the Redux store.
-         *
-         * @private
-         */
-        _bindPropertiesToReduxStore() {
-            // bind properties
-            const config = this.constructor.config
-            const properties = config && config.properties
-            bind(this, properties || {})
         }
 
         /**
