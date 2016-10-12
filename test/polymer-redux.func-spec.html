@@ -49,10 +49,23 @@
                         that.listener();
                     });
 
+                    var SubProperties = {
+                        properties: {
+                            name: {
+                                type: String,
+                                statePath: 'none'
+                            },
+                            subProp: {
+                                type: String,
+                                statePath: 'name'
+                            }
+                        }
+                    };
+
                     // test element
                     Polymer({
                         is: 'state-path',
-                        behaviors: [ PolymerRedux(this.store) ],
+                        behaviors: [ PolymerRedux(this.store), SubProperties ],
                         properties: {
                             state: {
                                 type: String,
@@ -98,11 +111,11 @@
                     });
 
                     it('should set property to statePath from store', function() {
-                        assert.strictEqual(this.propertyElement.name, this.state.name);
+                        assert.equal(this.propertyElement.name, this.state.name);
                     });
 
                     it('should set property to deep statePath from store', function() {
-                        assert.strictEqual(this.propertyElement.deepPath, this.state.deep.path);
+                        assert.equal(this.propertyElement.deepPath, this.state.deep.path);
                     });
 
                     it('should warn againgst "notify" flag on properties', function() {
@@ -115,11 +128,19 @@
                     });
 
                     it('should set "readOnly" property to statePath from store', function() {
-                        assert.strictEqual(this.propertyElement.read, this.state.read);
+                        assert.equal(this.propertyElement.read, this.state.read);
                     });
 
                     it('should not set any properties without statePath', function() {
                         assert.notEqual(this.propertyElement.none, this.state.none);
+                    });
+
+                    it('should set bevahior properties on element', function() {
+                        assert.equal(this.propertyElement.subProp, this.state.name);
+                    });
+
+                    it('should not set duplicate property from behaviors', function() {
+                        assert.notEqual(this.propertyElement.name, this.state.none);
                     });
 
                     describe('dispatching actions', function() {
