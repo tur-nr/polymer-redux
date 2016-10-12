@@ -11,19 +11,19 @@
     var warning = 'Polymer Redux: <%s>.%s has "notify" enabled, two-way bindings goes against Redux\'s paradigm';
 
     /**
-     * Factory function for creating a listener for a give Polymer element. The
-     * returning listener should be passed to `store.subscribe`.
+     * Returns property bindings found on a given Element/Behavior.
      *
+     * @param {HTMLElement|Object} obj Element or Behavior.
      * @param {HTMLElement} element Polymer element.
-     * @return {Function} Redux subcribe listener.
+     * @param {Object} store Redux store.
+     * @return {Array}
      */
-    function createListener(element, store) {
+    function getStatePathProperties(obj, element, store) {
         var props = [];
 
-        // property bindings
-        if (element.properties != null) {
-            Object.keys(element.properties).forEach(function(name) {
-                var prop = element.properties[name];
+        if (obj.properties != null) {
+            Object.keys(obj.properties).forEach(function(name) {
+                var prop = obj.properties[name];
                 if (prop.hasOwnProperty('statePath')) {
                     // notify flag, warn against two-way bindings
                     if (prop.notify && !prop.readOnly) {
@@ -37,6 +37,37 @@
                         type: prop.type
                     });
                 }
+            });
+        }
+
+        return props;
+    }
+
+    /**
+     * Factory function for creating a listener for a give Polymer element. The
+     * returning listener should be passed to `store.subscribe`.
+     *
+     * @param {HTMLElement} element Polymer element.
+     * @return {Function} Redux subcribe listener.
+     */
+    function createListener(element, store) {
+        var props = getStatePathProperties(element, element, store);
+
+        // behavior property bindings
+        if (Array.isArray(element.behaviors)) {
+            element.behaviors.forEach(function(behavior) {
+                var extras = getStatePathProperties(behavior, element, store);
+                if (extras.length) {
+                    Array.prototype.push.apply(props, extras);
+                }
+            });
+
+            // de-dupe behavior props
+            var names = props.map(function(prop) {
+                return prop.name; // grab the prop names
+            });
+            props = props.filter(function(prop, i) {
+                return names.indexOf(prop.name) === i; // indices must match
             });
         }
 
