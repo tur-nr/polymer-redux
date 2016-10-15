@@ -160,28 +160,58 @@
      *
      * @param {HTMLElement} element Polymer element.
      * @param {Object} store Redux store.
-     * @param {Array} args The arguments passed to `element.dispatch`.
+     * @param {Arguments} args The arguments passed to `element.dispatch`.
      * @return {Object} The computed Redux action.
      */
     function dispatchReduxAction(element, store, args) {
         var action = args[0];
         var actions = element.actions;
 
+        args = castArgumentsToArray(args);
+
         // action name
         if (actions && typeof action === 'string') {
             if (typeof actions[action] !== 'function') {
                 throw new TypeError('Polymer Redux: <' + element.is + '> has no action "' + action + '"');
             }
-            return store.dispatch(actions[action].apply(element, args.slice(1)));
+            action = actions[action].apply(element, args.slice(1));
         }
+
+        // !!! DEPRECIATED !!!
+        // This will be removed as of 1.0.
 
         // action creator
         if (typeof action === 'function' && action.length === 0) {
             return store.dispatch(action());
         }
 
+        // ---
+
+        // middleware, make sure we pass the polymer-redux dispatch
+        // so we have access to the elements action creators
+        if (typeof action === 'function') {
+            return store.dispatch(function() {
+                var argv = castArgumentsToArray(arguments);
+                // replace redux dispatch
+                argv.splice(0, 1, function() {
+                    return dispatchReduxAction(element, store, arguments);
+                });
+                return action.apply(element, argv);
+            });
+        }
+
         // action
         return store.dispatch(action);
+    }
+
+    /**
+     * Turns arguments into an Array.
+     *
+     * @param {Arguments} args
+     * @return {Array}
+     */
+    function castArgumentsToArray(args) {
+        return Array.prototype.slice.call(args, 0);
     }
 
     /**
@@ -232,8 +262,7 @@
              * @return {Object} The action that was dispatched.
              */
             dispatch: function(action /*, [...args] */) {
-                var args = Array.prototype.slice.call(arguments);
-                return dispatchReduxAction(this, store, args);
+                return dispatchReduxAction(this, store, arguments);
             },
 
             /**
