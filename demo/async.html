@@ -29,6 +29,8 @@
               var counter = state.counter;
               if (action.type === 'INCREMENT') {
                 ++counter;
+              } else if (action.type === 'DOUBLE') {
+                counter += counter;
               }
               return {
                 counter: counter,
@@ -39,6 +41,17 @@
               Redux.applyMiddleware(ReduxThunk.default)
             );
             var ReduxBehavior = PolymerRedux(store);
+            var AsyncBehavior = {
+              actions: {
+                double: function() {
+                  return function(dispatch) {
+                    setTimeout(function() {
+                      dispatch({ type: 'DOUBLE' });
+                    }, 1000);
+                  };
+                }
+              },
+            };
           </script>
 
           <!-- friends list module -->
@@ -52,11 +65,12 @@
               <button on-click="increment200Click">Increment (0.2s)</button>
               <button on-click="increment500Click">Increment (0.5s)</button>
               <button on-click="increment1000Click">Increment (1.0s)</button>
+              <button on-click="double1000Click">Double (1.0s)</button>
             </template>
             <script>
               Polymer({
                 is: 'x-counter',
-                behaviors: [ ReduxBehavior ],
+                behaviors: [ ReduxBehavior, AsyncBehavior ],
                 actions: {
                   increment: function(ms) {
                     if (ms) {
@@ -93,6 +107,9 @@
                     }, 1000);
                   });
                 },
+                double1000Click: function() {
+                  this.dispatch('double');
+                }
               });
             </script>
           </dom-module>
