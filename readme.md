@@ -184,6 +184,8 @@ Polymer({
 
 ~~`dispatch()` also takes a function that returns an action object. This function must have a length of zero, otherwise it will pass the function to Redux as middleware function. Or you may use the standard Redux way of dispatching.~~
 
+**DEPRECIATED** _The following example of dispatching actions will be removed in the next major release._
+
 ```javascript
 Polymer({
     handleClick: function() {
