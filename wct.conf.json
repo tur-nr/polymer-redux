@@ -1,7 +1,7 @@
 {
   "plugins": {
     "local": {
-      "browsers": ["firefox"]
+      "browsers": ["chrome", "firefox"]
     },
     "istanbul": {
       "dir": "./coverage",
