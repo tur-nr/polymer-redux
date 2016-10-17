@@ -151,7 +151,7 @@
                                 });
                                 this.actionElement = {
                                     is: 'fake-element',
-                                    actions: {
+                                    _reduxActions: {
                                         test: this.testAction
                                     }
                                 };
@@ -236,6 +236,40 @@
                                 this.behavior.dispatch(middleware);
 
                                 sinon.assert.notCalled(middleware);
+                            });
+
+                            it('should call middleware with polymer-redux dispatch', function() {
+                                var middleware = sinon.spy(function(dispatch) {});
+                                var dispatcher = sinon.stub();
+                                var storeDispatch = this.store.dispatch;
+
+                                this.store.resetStub();
+                                this.store.dispatch = sinon.stub().yields(dispatcher);
+                                this.behavior.dispatch(middleware);
+
+                                sinon.assert.calledWithMatch(middleware,
+                                    sinon.match.func.and(sinon.match(function(fn) {
+                                        return fn !== dispatcher;
+                                    }))
+                                );
+
+                                this.store.dispatch = storeDispatch;
+                            });
+
+                            it.only('should dispatch actions from middleware', function() {
+                                var action = {};
+                                var middleware = sinon.spy(function(dispatch) {
+                                    dispatch(action);
+                                });
+
+                                this.store.resetStub();
+                                this.behavior.dispatch(middleware);
+
+                                // call middleware
+                                var fn = this.store.dispatch.getCall(0).args[0];
+                                fn();
+
+                                sinon.assert.calledWith(this.store.dispatch, action);
                             });
                         });
                     });

@@ -13,6 +13,7 @@
     /**
      * Returns property bindings found on a given Element/Behavior.
      *
+     * @private
      * @param {HTMLElement|Object} obj Element or Behavior.
      * @param {HTMLElement} element Polymer element.
      * @param {Object} store Redux store.
@@ -47,6 +48,7 @@
      * Factory function for creating a listener for a give Polymer element. The
      * returning listener should be passed to `store.subscribe`.
      *
+     * @private
      * @param {HTMLElement} element Polymer element.
      * @return {Function} Redux subcribe listener.
      */
@@ -127,6 +129,7 @@
     /**
      * Binds an given Polymer element to a Redux store.
      *
+     * @private
      * @param {HTMLElement} element Polymer element.
      * @param {Object} store Redux store.
      */
@@ -144,6 +147,7 @@
     /**
      * Unbinds a Polymer element from a Redux store.
      *
+     * @private
      * @param {HTMLElement} element
      */
     function unbindReduxListener(element) {
@@ -154,34 +158,89 @@
     }
 
     /**
+     * Builds list of action creators from a given element and it's inherited
+     * behaviors setting the list onto the element.
+     *
+     * @private
+     * @param {HTMLElement} element Polymer element instance.
+     */
+    function compileActionCreators(element) {
+        var actions = {};
+        var behaviors = element.behaviors;
+
+        if (element._reduxActions) return;
+
+        // add behavior actions first, in reverse order so we keep priority
+        if (Array.isArray(behaviors)) {
+            for (var i = behaviors.length - 1; i >= 0; i--) {
+                Object.assign(actions, behaviors[i].actions);
+            }
+        }
+
+        // element actions have priority
+        element._reduxActions = Object.assign(actions, element.actions);
+    }
+
+    /**
      * Dispatches a Redux action via a Polymer element. This gives the element
      * a polymorphic dispatch function. See the readme for the various ways to
      * dispatch.
      *
+     * @private
      * @param {HTMLElement} element Polymer element.
      * @param {Object} store Redux store.
-     * @param {Array} args The arguments passed to `element.dispatch`.
+     * @param {Arguments} args The arguments passed to `element.dispatch`.
      * @return {Object} The computed Redux action.
      */
     function dispatchReduxAction(element, store, args) {
         var action = args[0];
-        var actions = element.actions;
+        var actions = element._reduxActions;
+
+        args = castArgumentsToArray(args);
 
         // action name
         if (actions && typeof action === 'string') {
             if (typeof actions[action] !== 'function') {
                 throw new TypeError('Polymer Redux: <' + element.is + '> has no action "' + action + '"');
             }
-            return store.dispatch(actions[action].apply(element, args.slice(1)));
+            action = actions[action].apply(element, args.slice(1));
         }
+
+        // !!! DEPRECIATED !!!
+        // This will be removed as of 1.0.
 
         // action creator
         if (typeof action === 'function' && action.length === 0) {
             return store.dispatch(action());
         }
 
+        // ---
+
+        // middleware, make sure we pass the polymer-redux dispatch
+        // so we have access to the elements action creators
+        if (typeof action === 'function') {
+            return store.dispatch(function() {
+                var argv = castArgumentsToArray(arguments);
+                // replace redux dispatch
+                argv.splice(0, 1, function() {
+                    return dispatchReduxAction(element, store, arguments);
+                });
+                return action.apply(element, argv);
+            });
+        }
+
         // action
         return store.dispatch(action);
+    }
+
+    /**
+     * Turns arguments into an Array.
+     *
+     * @param {Arguments} args
+     * @return {Array}
+     */
+    function castArgumentsToArray(args) {
+        return Array.prototype.slice.call(args, 0);
     }
 
     /**
@@ -215,10 +274,12 @@
 
             ready: function() {
                 bindReduxListener(this, store);
+                compileActionCreators(this);
             },
 
             attached: function() {
                 bindReduxListener(this, store);
+                compileActionCreators(this);
             },
 
             detached: function() {
@@ -232,8 +293,7 @@
              * @return {Object} The action that was dispatched.
              */
             dispatch: function(action /*, [...args] */) {
-                var args = Array.prototype.slice.call(arguments);
-                return dispatchReduxAction(this, store, args);
+                return dispatchReduxAction(this, store, arguments);
             },
 
             /**
