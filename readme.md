@@ -26,24 +26,6 @@ bower install --save polymer-redux
 
 ## Usage
 
-### Boilerplate
-
-Before importing Polymer Redux you must first include Redux to the applications
-document.
-
-```html
-<html>
-    <head>
-        <script src="./bower_components/webcomponentsjs/webcomponents.js"></script>
-        <script src="./node_modules/redux/dist/redux.js"></script>
-        <link rel="import" href="./bower_components/polymer-redux/polymer-redux.html">
-    </head>
-    <body>
-        <!-- app -->
-    </body>
-</html>
-```
-
 ### Setup
 
 To bind Polymer components with Redux you must first create a ReduxBehavior
