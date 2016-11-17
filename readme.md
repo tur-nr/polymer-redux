@@ -52,7 +52,7 @@ it's state and dispatch actions.
 ### Binding Properties
 
 Polymer Redux binds state to the components properties. This binding happens on
-the `created` callback. To bind a property to a value in the state set the
+the `ready` callback. To bind a property to a value in the state set the
 `statePath` key when defining properties in Polymer.
 
 ```javascript
