@@ -141,7 +141,7 @@ Just be aware when using selectors, they are an optimisation utility. When mutat
 Principle #2 of Redux's [Three Principles](http://redux.js.org/docs/introduction/ThreePrinciples.html),
 says that state is read-only. Polymer however allows components to have two-way
 binding via the `notify` flag. If the properties flagged with `notify` and have
-`statePath` set, you will recieve a warning in your application runtime.
+`statePath` set, you will receive a warning in your application runtime.
 
 ### Dispatching Actions
 
