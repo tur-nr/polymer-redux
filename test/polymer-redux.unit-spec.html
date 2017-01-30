@@ -256,7 +256,7 @@
                                 this.store.dispatch = storeDispatch;
                             });
 
-                            it.only('should dispatch actions from middleware', function() {
+                            it('should dispatch actions from middleware', function() {
                                 var action = {};
                                 var middleware = sinon.spy(function(dispatch) {
                                     dispatch(action);
@@ -288,6 +288,46 @@
 
                         it('should return store\'s state', function() {
                             assert.strictEqual(this.returnedState, this.state);
+                        });
+                    });
+
+                    describe('polyfill Object.assign for IE11', function() {
+                        var assign = Object.assign;
+
+                        before(function() {
+                            Object.assign = undefined;
+                        });
+
+                        after(function() {
+                            Object.assign = assign;
+                        });
+
+                        it('should not throw when Object.assign is undefined', function() {
+                            var ready = this.behavior.ready;
+                            assert.doesNotThrow(function() {
+                                ready.apply({
+                                    fire: function() {},
+                                    actions: {
+                                        foo: function() {}
+                                    }
+                                });
+                            });
+                        });
+
+                        it('should only assign own props', function() {
+                            var actions = {};
+                            actions.__proto__.foo = function() {};
+
+                            var ready = this.behavior.ready.apply({
+                                fire: function() {},
+                                actions: actions
+                            });
+                        });
+
+                        it('should not assign nulls/undefineds', function() {
+                            var ready = this.behavior.ready.apply({
+                                fire: function() {},
+                            });
                         });
                     });
                 });

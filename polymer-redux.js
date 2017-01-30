@@ -1,11 +1,11 @@
-(function(root, factory) {
+(function(global, factory) {
     /* istanbul ignore next */
     if (typeof exports === 'object' && typeof module === 'object') {
         module.exports = factory();
     } else if (typeof define === 'function' && define.amd) {
         define(factory);
     } else {
-        root['PolymerRedux'] = factory();
+        global['PolymerRedux'] = factory();
     }
 })(this, function() {
     var warning = 'Polymer Redux: <%s>.%s has "notify" enabled, two-way bindings goes against Redux\'s paradigm';
@@ -173,12 +173,12 @@
         // add behavior actions first, in reverse order so we keep priority
         if (Array.isArray(behaviors)) {
             for (var i = behaviors.length - 1; i >= 0; i--) {
-                Object.assign(actions, behaviors[i].actions);
+                objectAssign(actions, behaviors[i].actions);
             }
         }
 
         // element actions have priority
-        element._reduxActions = Object.assign(actions, element.actions);
+        element._reduxActions = objectAssign(actions, element.actions);
     }
 
     /**
@@ -241,6 +241,37 @@
      */
     function castArgumentsToArray(args) {
         return Array.prototype.slice.call(args, 0);
+    }
+
+    /**
+     * Object.assign()
+     *
+     * @param {Object} target
+     * @param {Object} [...obj]
+     * @return {Object} The target.
+     */
+    function objectAssign(target) {
+        // use browser
+        if (typeof Object.assign === 'function') {
+            return Object.assign.apply(Object, arguments);
+        }
+
+        var hasOwn = Object.prototype.hasOwnProperty;
+        var argc = arguments.length;
+        var obj;
+
+        for (var i = 1; i < argc; ++i) {
+            obj = arguments[i];
+            if (obj != null) {
+                for (var k in obj) {
+                    if (hasOwn.call(obj, k)) {
+                        target[k] = obj[k];
+                    }
+                }
+            }
+        }
+
+        return target;
     }
 
     /**
