@@ -74,7 +74,7 @@
         }
 
         // redux listener
-        return function() {
+        return function reduxListener() {
             var state = store.getState();
             props.forEach(function(property) {
                 var propName = property.name;
@@ -303,14 +303,17 @@
              * @param {*} state
              */
 
-            ready: function() {
-                bindReduxListener(this, store);
+            created: function() {
                 compileActionCreators(this);
             },
 
-            attached: function() {
+            ready: function() {
                 bindReduxListener(this, store);
-                compileActionCreators(this);
+            },
+
+            attached: function() {
+                compileActionCreators(this); // not sure if we need to this again???
+                bindReduxListener(this, store);
             },
 
             detached: function() {
