@@ -290,43 +290,113 @@
                             assert.strictEqual(this.returnedState, this.state);
                         });
                     });
+                    
+                    describe('#created', function () {
+                        it('should compile redux action creators', function() {
+                            var element = {
+                                actions: {
+                                    foo: function() {}
+                                }
+                            };
+                            this.behavior.created.call(element);
 
-                    describe('polyfill Object.assign for IE11', function() {
-                        var assign = Object.assign;
-
-                        before(function() {
-                            Object.assign = undefined;
+                            assert.deepEqual(element._reduxActions, {
+                                foo: element.actions.foo
+                            })
                         });
 
-                        after(function() {
-                            Object.assign = assign;
+                        it('should include behavior action creators', function() {
+                            var behavior = {
+                                actions: {
+                                    bar: function() {}
+                                }
+                            };
+                            var element = {
+                                behaviors: [ behavior ],
+                                actions: {
+                                    foo: function() {}
+                                }
+                            };
+                            this.behavior.created.call(element);
+
+                            assert.deepEqual(element._reduxActions, {
+                                foo: element.actions.foo,
+                                bar: behavior.actions.bar,
+                            })
                         });
 
-                        it('should not throw when Object.assign is undefined', function() {
-                            var ready = this.behavior.ready;
-                            assert.doesNotThrow(function() {
-                                ready.apply({
-                                    fire: function() {},
+                        it('should maintain action creators priority', function() {
+                            var one = {
+                                actions: {
+                                    foo: function() {},
+                                    bar: function() {},
+                                }
+                            };
+                            var two = {
+                                actions: {
+                                    foo: function() {},
+                                    bar: function() {},
+                                    baz: function () {},
+                                }
+                            };
+                            var element = {
+                                behaviors: [ one, two ],
+                                actions: {
+                                    foo: function() {}
+                                }
+                            };
+                            this.behavior.created.call(element);
+
+                            assert.deepEqual(element._reduxActions, {
+                                foo: element.actions.foo,
+                                bar: one.actions.bar,
+                                baz: two.actions.baz,
+                            })
+                        });
+
+                        describe('polyfill Object.assign for IE11', function() {
+                            var assign = Object.assign;
+
+                            before(function() {
+                                Object.assign = undefined;
+                            });
+
+                            after(function() {
+                                Object.assign = assign;
+                            });
+
+                            it('should only assign own props', function() {
+                                var element = {
                                     actions: {
                                         foo: function() {}
                                     }
+                                };
+
+                                element.actions.__proto__.bar = function() {};
+
+                                this.behavior.created.apply(element);
+
+                                assert.deepEqual(element._reduxActions, {
+                                    foo: element.actions.foo,
                                 });
                             });
-                        });
 
-                        it('should only assign own props', function() {
-                            var actions = {};
-                            actions.__proto__.foo = function() {};
-
-                            var ready = this.behavior.ready.apply({
-                                fire: function() {},
-                                actions: actions
+                            it('should not throw when Object.assign is undefined', function() {
+                                var created = this.behavior.created;
+                                assert.doesNotThrow(function() {
+                                    created.call({
+                                        actions: {}
+                                    });
+                                });
                             });
-                        });
 
-                        it('should not assign nulls/undefineds', function() {
-                            var ready = this.behavior.ready.apply({
-                                fire: function() {},
+                            it('should not assign null/undefined actions', function() {
+                                var element = {
+                                    actions: null,
+                                };
+                                this.behavior.created.call(element);
+
+                                assert.deepEqual(element._reduxActions, {});
                             });
                         });
                     });
