@@ -44,9 +44,7 @@
                   break;
               }
 
-              state.friends = friends;
-
-              return state;
+              return Object.assign({}, state, { friends: friends });
             }
             const store = Redux.createStore(reducer);
             const ReduxMixin = PolymerRedux(store);
