@@ -104,8 +104,7 @@ var index = function (store) {
             connectedCallback() {
                 super.connectedCallback();
 
-                var config = this.constructor.config;
-                var properties = config && config.properties;
+                var properties = this.constructor.properties;
 
                 bind(this, properties || {});
             }
@@ -133,8 +132,7 @@ var index = function (store) {
              * @return {Object} The action.
              */
             dispatch() {
-                var config = this.constructor.config;
-                var actions = config && config.actions;
+                var actions = this.constructor.actions;
 
                 // action creator
 

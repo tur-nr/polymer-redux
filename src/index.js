@@ -97,8 +97,7 @@ export default function(store) {
         connectedCallback() {
             super.connectedCallback()
 
-            const config = this.constructor.config
-            const properties = config && config.properties
+            const properties = this.constructor.properties;
 
             bind(this, properties || {})
         }
@@ -126,8 +125,7 @@ export default function(store) {
          * @return {Object} The action.
          */
         dispatch(...args) {
-            const config = this.constructor.config
-            const actions = config && config.actions
+            const actions = this.constructor.actions
 
             // action creator
             let [ action ] = args
