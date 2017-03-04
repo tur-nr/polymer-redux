@@ -49,9 +49,9 @@ var index = function (store) {
          */
         var update = function (state) {
             bindings.forEach(function (name) {
-                var _properties$name = properties[name];
-                var statePath = _properties$name.statePath;
-                var readOnly = _properties$name.readOnly;
+                var _properties$name = properties[name],
+                    statePath = _properties$name.statePath,
+                    readOnly = _properties$name.readOnly;
 
                 var value = typeof statePath === 'function' ? statePath.call(element, state) : Polymer.Path.get(state, statePath);
 
@@ -153,7 +153,7 @@ var index = function (store) {
             }
         };
     };
-}
+};
 
 return index;
 
