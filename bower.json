@@ -27,7 +27,7 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "2.0-preview"
+    "polymer": "2.0.0-rc.2"
   },
   "devDependencies": {
     "iron-demo-helpers": "2.0-preview"
