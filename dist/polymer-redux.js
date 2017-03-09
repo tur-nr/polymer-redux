@@ -90,6 +90,22 @@ var index = function (store) {
     };
 
     /**
+     * Collect values throughout proto chain
+     * @private
+     * @patam {Object} what  the initial prototype
+     * @param {String} which the property to collect
+     * @return {Object} the collected values
+     */
+    var collect = function(what, which) {
+      let res = {};
+      while (what) {
+        res = Object.assign(res, what[which]);
+        what = what.__proto__;
+      }
+      return res;
+    }
+
+    /**
      * Redux Mixin
      *
      * @example
@@ -104,7 +120,7 @@ var index = function (store) {
             connectedCallback() {
                 super.connectedCallback();
 
-                var properties = this.constructor.properties;
+                var properties = collect(this.constructor,'properties');
 
                 bind(this, properties || {});
             }
