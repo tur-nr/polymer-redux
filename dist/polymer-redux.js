@@ -167,6 +167,14 @@ var index = function (store) {
 
                 return store.dispatch(action);
             }
+
+            /**
+             * Gets the current state in the Redux store.
+             * @return {*}
+             */
+            getState() {
+                return store.getState();
+            }
         };
     };
 };
