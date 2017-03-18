@@ -90,20 +90,21 @@ var index = function (store) {
     };
 
     /**
-     * Collect values throughout proto chain
+     * Merges a property's object value using the defaults way.
+     * 
      * @private
-     * @patam {Object} what  the initial prototype
-     * @param {String} which the property to collect
+     * @param {Object} what Initial prototype
+     * @param {String} which Property to collect.
      * @return {Object} the collected values
      */
-    var collect = function(what, which) {
-      let res = {};
-      while (what) {
-        res = Object.assign(res, what[which]);
-        what = what.__proto__;
-      }
-      return res;
-    }
+    var collect = function (what, which) {
+        var res = {};
+        while (what) {
+            res = Object.assign({}, what[which], res); // respect prototype priority
+            what = Object.getPrototypeOf(what);
+        }
+        return res;
+    };
 
     /**
      * Redux Mixin
@@ -120,9 +121,13 @@ var index = function (store) {
             connectedCallback() {
                 super.connectedCallback();
 
-                var properties = collect(this.constructor,'properties');
+                var properties = collect(this.constructor, 'properties');
+                bind(this, properties);
 
-                bind(this, properties || {});
+                var behaviors = collect(this.constructor, 'actions');
+                Object.defineProperty(this, '_reduxActions', {
+                    value: behaviors
+                });
             }
 
             disconnectedCallback() {
@@ -148,7 +153,7 @@ var index = function (store) {
              * @return {Object} The action.
              */
             dispatch() {
-                var actions = this.constructor.actions;
+                var actions = this._reduxActions;
 
                 // action creator
 
@@ -170,6 +175,7 @@ var index = function (store) {
 
             /**
              * Gets the current state in the Redux store.
+             * 
              * @return {*}
              */
             getState() {

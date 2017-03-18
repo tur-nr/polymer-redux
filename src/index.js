@@ -84,6 +84,23 @@ export default function(store) {
     }
 
     /**
+     * Merges a property's object value using the defaults way.
+     * 
+     * @private
+     * @param {Object} what Initial prototype
+     * @param {String} which Property to collect.
+     * @return {Object} the collected values
+     */
+    const collect = (what, which) => {
+        let res = {}
+        while (what) {
+            res = Object.assign({}, what[which], res) // respect prototype priority
+            what = Object.getPrototypeOf(what)
+        }
+        return res
+    }
+
+    /**
      * Redux Mixin
      *
      * @example
@@ -97,9 +114,13 @@ export default function(store) {
         connectedCallback() {
             super.connectedCallback()
 
-            const properties = this.constructor.properties;
+            const properties = collect(this.constructor, 'properties')
+            bind(this, properties)
 
-            bind(this, properties || {})
+            const behaviors = collect(this.constructor, 'actions')
+            Object.defineProperty(this, '_reduxActions', {
+                value: behaviors,
+            });
         }
 
         disconnectedCallback() {
@@ -125,7 +146,7 @@ export default function(store) {
          * @return {Object} The action.
          */
         dispatch(...args) {
-            const actions = this.constructor.actions
+            const actions = this._reduxActions
 
             // action creator
             let [ action ] = args
@@ -141,6 +162,7 @@ export default function(store) {
 
         /**
          * Gets the current state in the Redux store.
+         * 
          * @return {*}
          */
         getState() {
