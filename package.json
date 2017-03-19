@@ -1,6 +1,6 @@
 {
   "name": "polymer-redux",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Polymer bindings for Redux.",
   "main": "polymer-redux.js",
   "scripts": {
