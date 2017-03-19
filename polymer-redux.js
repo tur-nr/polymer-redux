@@ -275,10 +275,10 @@
     }
 
     /**
-     * Creates PolymerRedux behaviors from a given Redux store.
+     * Creates a ReduxBehavior behavior from a given Redux store.
      *
      * @param {Object} store Redux store.
-     * @return {PolymerRedux}
+     * @return {ReduxBehavior}
      */
     return function(store) {
         var PolymerRedux;
@@ -293,7 +293,7 @@
          *
          * Full documentation available, https://github.com/tur-nr/polymer-redux.
          *
-         * @polymerBehavior PolymerRedux
+         * @polymerBehavior ReduxBehavior
          * @demo demo/index.html
          */
         return PolymerRedux = {
