@@ -27,6 +27,6 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "2.0.0-rc.2"
+    "polymer": "^2.0.0-rc.3"
   }
 }

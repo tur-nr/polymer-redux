@@ -1,6 +1,4 @@
 bower_components
 coverage
 node_modules
-lib
-dist
 *.log

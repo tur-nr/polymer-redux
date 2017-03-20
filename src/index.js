@@ -6,7 +6,7 @@
  * @param {Object} store Redux store.
  * @return {Function} Class mixin.
  */
-export default store => {
+export default function PolymerRedux(store) {
 	const subscribers = new Map();
 
 	/**
@@ -29,7 +29,7 @@ export default store => {
 		const bindings = Object.keys(properties)
 			.filter(name => {
 				const property = properties[name];
-				if (Object.prototype.hasOwnProperty.call(properties, 'statePath')) {
+				if (Object.prototype.hasOwnProperty.call(property, 'statePath')) {
 					if (!property.readOnly && property.notify) {
 						console.warn(`PolymerRedux: <${element.constructor.is}>.${name} has "notify" enabled, two-way bindings goes against Redux's paradigm`);
 					}
@@ -96,23 +96,23 @@ export default store => {
 	const collect = (what, which) => {
 		let res = {};
 		while (what) {
-			res = {...what[which], res}; // Respect prototype priority
+			res = {...what[which], ...res}; // Respect prototype priority
 			what = Object.getPrototypeOf(what);
 		}
 		return res;
 	};
 
 	/**
-	 * Redux Mixin
+	 * ReduxMixin
 	 *
 	 * @example
 	 *     const ReduxMixin = PolymerRedux(store)
 	 *     class Foo extends ReduxMixin(Polymer.Element) { }
 	 *
-	 * @param {Polymer.Element|HTMLElement} parent The polymer parent element.
+	 * @param {Polymer.Element} parent The polymer parent element.
 	 * @return {Function} PolymerRedux mixed class.
 	 */
-	return parent => class extends parent {
+	return parent => class ReduxMixin extends parent {
 		connectedCallback() {
 			super.connectedCallback();
 
@@ -171,4 +171,4 @@ export default store => {
 			return store.getState();
 		}
 	};
-};
+}

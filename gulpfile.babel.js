@@ -27,10 +27,12 @@ gulp.task('build:lib', () => {
 							'not ie 10'
 						]
 					},
-					modules: false
+					modules: false,
+					exclude: [
+						'transform-es2015-classes'
+					]
 				}]],
 				plugins: [
-					'external-helpers',
 					'transform-object-rest-spread'
 				]
 			})
@@ -58,10 +60,10 @@ gulp.task('dist', ['build'], () => {
 
 		mkdirSync('dist');
 
-		return pify(writeFile)('dist/polymer-redux.html', html);
+		return pify(writeFile)('dist/polymer-redux.html', `${html}\n`);
 	});
 });
 
-gulp.task('develop', ['build:dist'], () => {
-	gulp.watch(['src/**/*.js'], ['build:dist']);
+gulp.task('develop', ['dist'], () => {
+	gulp.watch(['src/**/*'], ['dist']);
 });
