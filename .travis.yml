@@ -1,5 +1,4 @@
-os:
-  - linux
+dist: trusty
 
 sudo: true
 
