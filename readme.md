@@ -71,13 +71,11 @@ Polymer Redux binds state to the components properties. This binding happens on
 
 ```javascript
 class MyElement extends ReduxMixin(Polymer.Element) {
-    static get config() {
+    static get properties() {
         return {
-            properties: {
-                message: {
-                    type: String,
-                    statePath: 'message'
-                }
+            message: {
+                type: String,
+                statePath: 'message'
             }
         }
     }
@@ -87,10 +85,13 @@ class MyElement extends ReduxMixin(Polymer.Element) {
 `<MyElement>.message` is now bound to the value of `message` in the state.
 Whenever the store state changes so to will the properties of the element.
 
+**Note** Don't try to access any properties that have been binded to the redux
+store during the `ready()` callback. Properties are dynamically set on
+`connectedCallback()`, [read more](https://www.polymer-project.org/2.0/docs/devguide/custom-elements#one-time-initialization).
+
 #### Dot Notation
 
 Binding properties this way makes use of [`Polymer.Path.get()`](http://polymer.github.io/polymer/) method, so you can use dot notation paths like so: `'user.firstName'`.
-
 
 #### Dynamic Bindings
 
@@ -114,14 +115,12 @@ To allow these use cases the `statePath` can also take a `Function` instead of a
 
 ```javascript
 class MyElement extends ReduxMixin(Polymer.Element) {
-    static get config() {
+    static get properties() {
         return {
-            properties: {
-                message: {
-                    type: String,
-                    statePath(state) {
-                        return state.todosById[state.todoToEdit]
-                    }
+            message: {
+                type: String,
+                statePath(state) {
+                    return state.todosById[state.todoToEdit]
                 }
             }
         }
@@ -145,13 +144,10 @@ const editTodoSelector = Reselect.createSelector(
     }
 );
 class MyElement extends ReduxMixin(Polymer.Element) {
-    static get config() {
-        return {
-            properties: {
-                message: {
-                    type: String,
-                    statePath: editTodoSelector
-                }
+    static get properties() {
+            message: {
+                type: String,
+                statePath: editTodoSelector
             }
         }
     }
@@ -173,15 +169,13 @@ For an easier and semantic way to dispatch actions against the store, is to crea
 
 ```javascript
 class MyElement extends ReduxMixin(Polymer.Element) {
-    static get config() {
+    static get actions() {
         return {
-            actions: {
-                setName(first, last) {
-                    return {
-                        type: 'SET_NAME',
-                        first,
-                        last
-                    }
+            setName(first, last) {
+                return {
+                    type: 'SET_NAME',
+                    first,
+                    last
                 }
             }
         }
