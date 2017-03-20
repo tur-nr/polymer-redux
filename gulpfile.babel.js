@@ -3,6 +3,8 @@ import gulp from 'gulp';
 import del from 'del';
 import sequence from 'run-sequence';
 import {rollup} from 'rollup';
+import nodeResolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
 import babelRollup from 'rollup-plugin-babel';
 import {Bundler} from 'polymer-bundler';
 import {serialize} from 'parse5';
@@ -18,6 +20,13 @@ gulp.task('build:lib', () => {
 	return rollup({
 		entry: 'src/index.js',
 		plugins: [
+			nodeResolve({
+				jsnext: true,
+				main: true
+			}),
+			commonjs({
+				include: 'node_modules/**'
+			}),
 			babelRollup({
 				babelrc: false,
 				presets: [['env', {

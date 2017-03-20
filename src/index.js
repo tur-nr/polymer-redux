@@ -1,3 +1,9 @@
+import window from 'global/window';
+import console from 'global/console';
+
+// Expose globals
+const {CustomEvent, Polymer} = window;
+
 /**
  * Polymer Redux
  *
@@ -7,6 +13,12 @@
  * @return {Function} Class mixin.
  */
 export default function PolymerRedux(store) {
+	if (!store) {
+		throw new TypeError('PolymerRedux: expecting a redux store.');
+	} else if (!['getState', 'dispatch', 'subscribe'].every(k => typeof store[k] === 'function')) {
+		throw new TypeError('PolymerRedux: invalid store object.');
+	}
+
 	const subscribers = new Map();
 
 	/**
@@ -121,6 +133,7 @@ export default function PolymerRedux(store) {
 
 			const actions = collect(this.constructor, 'actions');
 			Object.defineProperty(this, '_reduxActions', {
+				configurable: true,
 				value: actions
 			});
 		}
@@ -153,10 +166,24 @@ export default function PolymerRedux(store) {
 			// Action creator
 			let [action] = args;
 			if (typeof action === 'string') {
-				if (!actions || typeof actions[action] !== 'function') {
-					throw new TypeError(`PolymerRedux: <${this.constructor.is}> has no action creator "${action}"`);
+				if (!actions) {
+					throw new TypeError(`PolyerRedux: <${this.constructor.is}> has no actions defined.`);
+				} else if (typeof actions[action] !== 'function') {
+					throw new TypeError(`PolymerRedux: <${this.constructor.is}> invalid action creator "${action}"`);
 				}
-				action = actions[action].apply(this.constructor, args.slice(1));
+				action = actions[action](...args.slice(1));
+			}
+
+			// Proxy async dispatch
+			if (typeof action === 'function') {
+				const originalAction = action;
+				action = (...args) => {
+					// Replace redux dispatch
+					args.splice(0, 1, (...args) => {
+						return this.dispatch(...args);
+					});
+					return originalAction(...args);
+				};
 			}
 
 			return store.dispatch(action);

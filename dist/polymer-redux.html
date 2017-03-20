@@ -1,7 +1,37 @@
 <html><head><script type="text/javascript">var PolymerRedux = (function () {
 'use strict';
 
+var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+
+
+
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var window_1 = createCommonjsModule(function (module) {
+    if (typeof window !== "undefined") {
+        module.exports = window;
+    } else if (typeof commonjsGlobal !== "undefined") {
+        module.exports = commonjsGlobal;
+    } else if (typeof self !== "undefined") {
+        module.exports = self;
+    } else {
+        module.exports = {};
+    }
+});
+
+var console_1 = console;
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+// Expose globals
+var CustomEvent = window_1.CustomEvent;
+var Polymer = window_1.Polymer;
 
 /**
  * Polymer Redux
@@ -11,7 +41,16 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
  * @param {Object} store Redux store.
  * @return {Function} Class mixin.
  */
+
 function PolymerRedux(store) {
+	if (!store) {
+		throw new TypeError('PolymerRedux: expecting a redux store.');
+	} else if (!['getState', 'dispatch', 'subscribe'].every(function (k) {
+		return typeof store[k] === 'function';
+	})) {
+		throw new TypeError('PolymerRedux: invalid store object.');
+	}
+
 	var subscribers = new Map();
 
 	/**
@@ -35,7 +74,7 @@ function PolymerRedux(store) {
 			var property = properties[name];
 			if (Object.prototype.hasOwnProperty.call(property, 'statePath')) {
 				if (!property.readOnly && property.notify) {
-					console.warn('PolymerRedux: <' + element.constructor.is + '>.' + name + ' has "notify" enabled, two-way bindings goes against Redux\'s paradigm');
+					console_1.warn('PolymerRedux: <' + element.constructor.is + '>.' + name + ' has "notify" enabled, two-way bindings goes against Redux\'s paradigm');
 				}
 				return true;
 			}
@@ -127,6 +166,7 @@ function PolymerRedux(store) {
 
 				var actions = collect(this.constructor, 'actions');
 				Object.defineProperty(this, '_reduxActions', {
+					configurable: true,
 					value: actions
 				});
 			}
@@ -154,21 +194,40 @@ function PolymerRedux(store) {
     * @return {Object} The action.
     */
 			dispatch() {
-				var actions = this._reduxActions;
-
-				// Action creator
+				var _this = this;
 
 				for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 					args[_key] = arguments[_key];
 				}
 
+				var actions = this._reduxActions;
+
+				// Action creator
 				var action = args[0];
 
 				if (typeof action === 'string') {
-					if (!actions || typeof actions[action] !== 'function') {
-						throw new TypeError('PolymerRedux: <' + this.constructor.is + '> has no action creator "' + action + '"');
+					if (!actions) {
+						throw new TypeError('PolyerRedux: <' + this.constructor.is + '> has no actions defined.');
+					} else if (typeof actions[action] !== 'function') {
+						throw new TypeError('PolymerRedux: <' + this.constructor.is + '> invalid action creator "' + action + '"');
 					}
-					action = actions[action].apply(this.constructor, args.slice(1));
+					action = actions[action].apply(actions, _toConsumableArray(args.slice(1)));
+				}
+
+				// Proxy async dispatch
+				if (typeof action === 'function') {
+					var originalAction = action;
+					action = function action() {
+						for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+							args[_key2] = arguments[_key2];
+						}
+
+						// Replace redux dispatch
+						args.splice(0, 1, function () {
+							return _this.dispatch.apply(_this, arguments);
+						});
+						return originalAction.apply(undefined, args);
+					};
 				}
 
 				return store.dispatch(action);
