@@ -55,13 +55,9 @@
       {
         "files": "gulpfile.babel.js",
         "rules": {
-          "indent": [
-            "error",
-            "tab",
-            {
-              "MemberExpression": 1
-            }
-          ]
+          "indent": ["error", "tab", {
+            "MemberExpression": 1
+          }]
         }
       },
       {
