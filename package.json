@@ -6,7 +6,7 @@
   "jsnext:main": "src/index.js",
   "scripts": {
     "build": "gulp",
-    "test": "wct",
+    "test": "xo && wct",
     "lint": "polylint"
   },
   "repository": {
@@ -28,27 +28,51 @@
   "homepage": "https://github.com/tur-nr/polymer-redux#readme",
   "devDependencies": {
     "babel-plugin-external-helpers": "^6.8.0",
-    "babel-plugin-remove-comments": "^2.0.0",
-    "babel-plugin-transform-es2015-arrow-functions": "^6.8.0",
-    "babel-plugin-transform-es2015-block-scoping": "^6.15.0",
-    "babel-plugin-transform-es2015-destructuring": "^6.9.0",
-    "babel-plugin-transform-es2015-parameters": "^6.11.4",
-    "babel-plugin-transform-es2015-shorthand-properties": "^6.8.0",
-    "babel-plugin-transform-es2015-spread": "^6.8.0",
-    "babel-plugin-transform-es2015-template-literals": "^6.8.0",
-    "babel-preset-babili": "0.0.3",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-preset-env": "^1.2.2",
+    "babel-register": "^6.24.0",
     "bower": "^1.5.2",
     "coveralls": "^2.11.9",
+    "del": "^2.2.2",
     "gulp": "^3.9.1",
-    "gulp-babel": "^6.1.2",
-    "gulp-rename": "^1.2.2",
+    "parse5": "^3.0.2",
+    "pify": "^2.3.0",
     "polylint": "^2.10.1",
+    "polymer-bundler": "^2.0.0-pre.6",
     "polymer-cli": "^0.11.1",
     "redux": "^3.0.5",
     "reselect": "^2.5.1",
     "rollup": "^0.36.0",
     "rollup-plugin-babel": "^2.6.1",
+    "run-sequence": "^1.2.2",
     "web-component-tester": "~4.2.2",
-    "web-component-tester-istanbul": "https://github.com/t2ym/web-component-tester-istanbul/tarball/0.10.1"
+    "web-component-tester-istanbul": "https://github.com/t2ym/web-component-tester-istanbul/tarball/0.10.1",
+    "xo": "^0.18.0"
+  },
+  "xo": {
+    "next": true,
+    "overrides": [
+      {
+        "files": "gulpfile.babel.js",
+        "rules": {
+          "indent": [
+            "error",
+            "tab",
+            {
+              "MemberExpression": 1
+            }
+          ]
+        }
+      },
+      {
+        "files": "src/*.js",
+        "globals": [
+          "Polymer"
+        ],
+        "envs": [
+          "browser"
+        ]
+      }
+    ]
   }
 }

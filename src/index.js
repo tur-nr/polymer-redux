@@ -6,167 +6,169 @@
  * @param {Object} store Redux store.
  * @return {Function} Class mixin.
  */
-export default function(store) {
-    const subscribers = new Map()
+export default store => {
+	const subscribers = new Map();
 
-    /**
-     * Binds element's properties to state changes from the Redux store.
-     *
-     * @example
-     *     const update = bind(el, props) // set bindings
-     *     update(state) // manuel update
-     *
-     * @private
-     * @param {HTMLElement} element
-     * @param {Object} properties
-     * @return {Function} Update function.
-     */
-    const bind = (element, properties) => {
-        if (subscribers.has(element)) return
+	/**
+	 * Binds element's properties to state changes from the Redux store.
+	 *
+	 * @example
+	 *     const update = bind(el, props) // set bindings
+	 *     update(state) // manuel update
+	 *
+	 * @private
+	 * @param {HTMLElement} element
+	 * @param {Object} properties
+	 * @return {Function} Update function.
+	 */
+	const bind = (element, properties) => {
+		if (subscribers.has(element)) {
+			return;
+		}
 
-        const bindings = Object.keys(properties)
-            .filter((name) => {
-                const property = properties[name]
-                if (property.hasOwnProperty('statePath')) {
-                    if (!property.readOnly && property.notify) {
-                        console.warn(`PolymerRedux: <${element.constructor.is}>.${name} has "notify" enabled, two-way bindings goes against Redux's paradigm`)
-                    }
-                    return true
-                }
-                return false
-            })
+		const bindings = Object.keys(properties)
+			.filter(name => {
+				const property = properties[name];
+				if (Object.prototype.hasOwnProperty.call(properties, 'statePath')) {
+					if (!property.readOnly && property.notify) {
+						console.warn(`PolymerRedux: <${element.constructor.is}>.${name} has "notify" enabled, two-way bindings goes against Redux's paradigm`);
+					}
+					return true;
+				}
+				return false;
+			});
 
-        /**
-         * Updates an element's properties with the given state.
-         *
-         * @private
-         * @param {Object} state
-         */
-        const update = (state) => {
-            bindings.forEach((name) => {
-                const { statePath, readOnly } = properties[name]
-                const value = (typeof statePath === 'function')
-                    ? statePath.call(element, state)
-                    : Polymer.Path.get(state, statePath)
+		/**
+		 * Updates an element's properties with the given state.
+		 *
+		 * @private
+		 * @param {Object} state
+		 */
+		const update = state => {
+			bindings.forEach(name => {
+				const {statePath, readOnly} = properties[name];
+				const value = (typeof statePath === 'function') ?
+					statePath.call(element, state) :
+					Polymer.Path.get(state, statePath);
 
-                if (readOnly) {
-                    element._setProperty(name, value)
-                } else {
-                    element[name] = value
-                }
-            })
-        }
+				if (readOnly) {
+					element._setProperty(name, value);
+				} else {
+					element[name] = value;
+				}
+			});
+		};
 
-        // redux listener
-        const unsubscribe = store.subscribe(() => {
-            const state = store.getState()
-            update(state)
+		// Redux listener
+		const unsubscribe = store.subscribe(() => {
+			const detail = store.getState();
+			update(detail);
 
-            element.dispatchEvent(new CustomEvent('state-changed', {
-                detail: state
-            }))
-        })
+			element.dispatchEvent(new CustomEvent('state-changed', {detail}));
+		});
 
-        subscribers.set(element, unsubscribe)
+		subscribers.set(element, unsubscribe);
 
-        return update(store.getState())
-    }
+		return update(store.getState());
+	};
 
-    /**
-     * Unbinds an element from state changes in the Redux store.
-     *
-     * @private
-     * @param {HTMLElement} element
-     */
-    const unbind = (element) => {
-        const off = subscribers.get(element)
-        if (typeof off === 'function') off()
-    }
+	/**
+	 * Unbinds an element from state changes in the Redux store.
+	 *
+	 * @private
+	 * @param {HTMLElement} element
+	 */
+	const unbind = element => {
+		const off = subscribers.get(element);
+		if (typeof off === 'function') {
+			off();
+		}
+	};
 
-    /**
-     * Merges a property's object value using the defaults way.
-     * 
-     * @private
-     * @param {Object} what Initial prototype
-     * @param {String} which Property to collect.
-     * @return {Object} the collected values
-     */
-    const collect = (what, which) => {
-        let res = {}
-        while (what) {
-            res = Object.assign({}, what[which], res) // respect prototype priority
-            what = Object.getPrototypeOf(what)
-        }
-        return res
-    }
+	/**
+	 * Merges a property's object value using the defaults way.
+	 *
+	 * @private
+	 * @param {Object} what Initial prototype
+	 * @param {String} which Property to collect.
+	 * @return {Object} the collected values
+	 */
+	const collect = (what, which) => {
+		let res = {};
+		while (what) {
+			res = {...what[which], res}; // Respect prototype priority
+			what = Object.getPrototypeOf(what);
+		}
+		return res;
+	};
 
-    /**
-     * Redux Mixin
-     *
-     * @example
-     *     const ReduxMixin = PolymerRedux(store)
-     *     class Foo extends ReduxMixin(Polymer.Element) { }
-     *
-     * @param {Polymer.Element} parent The polymer parent element.
-     * @return {Function} PolymerRedux mixed class.
-     */
-    return (parent) => class extends parent {
-        connectedCallback() {
-            super.connectedCallback()
+	/**
+	 * Redux Mixin
+	 *
+	 * @example
+	 *     const ReduxMixin = PolymerRedux(store)
+	 *     class Foo extends ReduxMixin(Polymer.Element) { }
+	 *
+	 * @param {Polymer.Element|HTMLElement} parent The polymer parent element.
+	 * @return {Function} PolymerRedux mixed class.
+	 */
+	return parent => class extends parent {
+		connectedCallback() {
+			super.connectedCallback();
 
-            const properties = collect(this.constructor, 'properties')
-            bind(this, properties)
+			const properties = collect(this.constructor, 'properties');
+			bind(this, properties);
 
-            const behaviors = collect(this.constructor, 'actions')
-            Object.defineProperty(this, '_reduxActions', {
-                value: behaviors,
-            });
-        }
+			const actions = collect(this.constructor, 'actions');
+			Object.defineProperty(this, '_reduxActions', {
+				value: actions
+			});
+		}
 
-        disconnectedCallback() {
-            super.disconnectedCallback()
-            unbind(this)
-        }
+		disconnectedCallback() {
+			super.disconnectedCallback();
+			unbind(this);
+		}
 
-        /**
-         * Dispatches an action to the Redux store.
-         *
-         * @example
-         *     element.dispatch({ type: 'ACTION' })
-         *
-         * @example
-         *     element.dispatch('actionCreator', 'foo', 'bar')
-         *
-         * @example
-         *     element.dispatch((dispatch) => {
-         *         dispatch({ type: 'MIDDLEWARE'})
-         *     })
-         *
-         * @param  {...*} args
-         * @return {Object} The action.
-         */
-        dispatch(...args) {
-            const actions = this._reduxActions
+		/**
+		 * Dispatches an action to the Redux store.
+		 *
+		 * @example
+		 *     element.dispatch({ type: 'ACTION' })
+		 *
+		 * @example
+		 *     element.dispatch('actionCreator', 'foo', 'bar')
+		 *
+		 * @example
+		 *     element.dispatch((dispatch) => {
+		 *         dispatch({ type: 'MIDDLEWARE'})
+		 *     })
+		 *
+		 * @param  {...*} args
+		 * @return {Object} The action.
+		 */
+		dispatch(...args) {
+			const actions = this._reduxActions;
 
-            // action creator
-            let [ action ] = args
-            if (typeof action === 'string') {
-                if (!actions || typeof actions[action] !== 'function') {
-                    throw new TypeError(`PolymerRedux: <${this.constructor.is}> has no action creator "${action}"`)
-                }
-                action = actions[action].apply(this.constructor, args.slice(1))
-            }
+			// Action creator
+			let [action] = args;
+			if (typeof action === 'string') {
+				if (!actions || typeof actions[action] !== 'function') {
+					throw new TypeError(`PolymerRedux: <${this.constructor.is}> has no action creator "${action}"`);
+				}
+				action = actions[action].apply(this.constructor, args.slice(1));
+			}
 
-            return store.dispatch(action)
-        }
+			return store.dispatch(action);
+		}
 
-        /**
-         * Gets the current state in the Redux store.
-         * 
-         * @return {*}
-         */
-        getState() {
-            return store.getState();
-        }
-    }
-}
+		/**
+		 * Gets the current state in the Redux store.
+		 *
+		 * @return {*}
+		 */
+		getState() {
+			return store.getState();
+		}
+	};
+};

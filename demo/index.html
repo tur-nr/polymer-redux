@@ -1,11 +1,10 @@
 <!doctype html>
 <html>
   <head>
-    <title>Polymer Redux Demo</title>
+    <title>polymer-redux demo</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <script src="../../../node_modules/redux/dist/redux.js"></script>
 
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
@@ -17,155 +16,14 @@
   </head>
   <body>
 
-    <div class="vertical-section-container">
-      <h3>Polymer Redux Demo</h3>
+    <div class="vertical-section-container centered">
+      <h3>Basic polymer-redux Demo</h3>
       <demo-snippet>
         <template>
-          <!-- redux setup -->
-          <script>
-            const reducer = (state, action) => {
-              if (!state) return { friends: [] };
-
-              // copy friends list
-              friends = state.friends.slice(0);
-
-              switch (action.type) {
-                case 'ADD_FRIEND':
-                  friends.push(action.friend);
-                  break;
-                case 'REMOVE_FRIEND':
-                  const idx = friends.indexOf(action.friend)
-                  if (idx !== -1) {
-                      friends.splice(idx, 1)
-                  }
-                  break;
-                case 'SORT_FRIENDS':
-                  friends.sort()
-                  break;
-              }
-
-              return Object.assign({}, state, { friends: friends });
-            }
-            const store = Redux.createStore(reducer);
-            const ReduxMixin = PolymerRedux(store);
-          </script>
-
-          <!-- friends list module -->
-          <dom-module id="friend-item">
-            <template>
-              <li>
-                <span>[[name]]</span>
-                <button on-click="remove">Remove</button>
-              </li>
-            </template>
-            <script>
-              class FriendItem extends ReduxMixin(Polymer.Element) {
-                static get is() {
-                  return 'friend-item'
-                }
-
-                static get config() {
-                  return {
-                    properties: {
-                      name: String
-                    }
-                  }
-                }
-
-                remove() {
-                  this.dispatch({
-                    type: 'REMOVE_FRIEND',
-                    friend: this.name
-                  })
-                }
-              }
-
-              customElements.define(FriendItem.is, FriendItem)
-            </script>
-          </dom-module>
-
-          <dom-module id="friends-list">
-            <template>
-              <p>
-                <span>You have [[friends.length]] friend(s).</span>
-                <dom-if if="[[canSortFriends(friends.length)]]">
-                  <template>
-                    <button on-click="sortFriends">Sort Friends</button>
-                  </template>
-                </dom-if>
-              </p>
-              <ul>
-                <dom-repeat items="[[friends]]">
-                  <template>
-                    <friend-item name="[[item]]"></friend-item>
-                  </template>
-                </dom-repeat>
-              </ul>
-              <input id="friend-name" placeholder="Name" on-keypress="handleKeypress">
-              <button on-click="addFriend">Add Friend</button>
-            </template>
-            <script>
-              class FriendsList extends ReduxMixin(Polymer.Element) {
-                static get is() {
-                  return 'friends-list'
-                }
-
-                static get config() {
-                  return {
-                    properties: {
-                      friends: {
-                        type: Array,
-                        statePath: 'friends'
-                      }
-                    },
-                    actions: {
-                      add(name) {
-                        return {
-                          type: 'ADD_FRIEND',
-                          friend: name
-                        }
-                      },
-                      sort() {
-                        return {
-                          type: 'SORT_FRIENDS'
-                        }
-                      }
-                    }
-                  }
-                }
-
-                addFriend() {
-                  const input = this.$['friend-name'];
-                  if (input.value) {
-                    this.dispatch('add', input.value);
-                    input.value = '';
-                    input.focus();
-                  }
-                }
-
-                sortFriends() {
-                  this.dispatch('sort');
-                }
-
-                canSortFriends(length) {
-                  return length > 1;
-                }
-
-                handleKeypress(event) {
-                  if (event.charCode === 13) {
-                    this.addFriend();
-                  }
-                }
-              }
-
-              customElements.define(FriendsList.is, FriendsList)
-            </script>
-          </dom-module>
-
-          <!-- demo -->
-          <friends-list></friends-list>
+          <polymer-redux></polymer-redux>
         </template>
       </demo-snippet>
     </div>
+
   </body>
 </html>
