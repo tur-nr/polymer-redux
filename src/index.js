@@ -125,18 +125,19 @@ export default function PolymerRedux(store) {
 	 * @return {Function} PolymerRedux mixed class.
 	 */
 	return parent => class ReduxMixin extends parent {
-		connectedCallback() {
-			const properties = collect(this.constructor, 'properties');
-			bind(this, properties);
+		constructor(...args) {
+			super(...args);
 
+			// collect the action creators first as property changes trigger
+			// dispatches from observers, see #65, #66, #67
 			const actions = collect(this.constructor, 'actions');
 			Object.defineProperty(this, '_reduxActions', {
 				configurable: true,
 				value: actions
 			});
 
-			// ^^^ bind first, fixes #66
-			super.connectedCallback();
+			const properties = collect(this.constructor, 'properties');
+			bind(this, properties);
 		}
 
 		disconnectedCallback() {

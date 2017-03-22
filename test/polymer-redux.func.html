@@ -66,7 +66,7 @@
 							},
 							bar: {
 								readOnly: true,
-								statePath(state) {
+								statePath: function(state) {
 									return state.bar;
 								}
 							},
@@ -80,7 +80,7 @@
 					}
 					static get actions() {
 						return {
-							action(type) {
+							action: function(type) {
 								return {
 									type: type
 								};
@@ -109,12 +109,12 @@
 
 						static get actions() {
 							return {
-								foo() {
+								foo: function() {
 									return {
 										type: 'FOO'
 									};
 								},
-								bar() {
+								bar: function() {
 									return {
 										type: 'BAR'
 									}
@@ -128,6 +128,10 @@
 					static get is() { return 'fixture-two'; }
 					static get properties() {
 						return {
+							foo: {
+								statePath: 'foo',
+								observer: '_fooChanged'
+							},
 							bar: {
 								value: 'hijacked'
 							}
@@ -135,15 +139,52 @@
 					}
 					static get actions() {
 						return {
-							bar(type) {
+							bar: function() {
 								return {
 									type: 'FOO'
+								};
+							},
+							baz: function() {
+								return {
+									type: 'BAZ'
+								}
+							}
+						};
+					}
+					_fooChanged() {
+						this.dispatch('baz');
+					}
+				}
+				window.customElements.define(FixtureTwo.is, FixtureTwo);
+			</script>
+		</dom-module>
+
+		<dom-module id="fixture-three">
+			<script>
+				class FixtureThree extends ReduxMixin(Polymer.Element) {
+					static get is() { return 'fixture-three'; }
+					static get properties() {
+						return {
+							foo: {
+								statePath: 'foo',
+								observer: '_fooChanged'
+							}
+						};
+					}
+					static get actions() {
+						return {
+							bar: function() {
+								return {
+									type: 'BAR'
 								};
 							}
 						};
 					}
+					_fooChanged() {
+						this.dispatch('bar');
+					}
 				}
-				window.customElements.define(FixtureTwo.is, FixtureTwo);
+				window.customElements.define(FixtureThree.is, FixtureThree);
 			</script>
 		</dom-module>
 
@@ -156,6 +197,12 @@
     <test-fixture id="two">
       <template>
         <fixture-two></fixture-two>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="issue-66">
+      <template>
+        <fixture-three></fixture-three>
       </template>
     </test-fixture>
 
@@ -271,6 +318,12 @@
           assert.notEqual(element.foo, state.foo);
 				});
       });
+
+			describe('issue #66', function() {
+				it('should have actions available', function() {
+					fixture('issue-66');
+				})
+			});
     </script>
   </body>
 </html>
