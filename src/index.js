@@ -126,8 +126,6 @@ export default function PolymerRedux(store) {
 	 */
 	return parent => class ReduxMixin extends parent {
 		connectedCallback() {
-			super.connectedCallback();
-
 			const properties = collect(this.constructor, 'properties');
 			bind(this, properties);
 
@@ -136,11 +134,14 @@ export default function PolymerRedux(store) {
 				configurable: true,
 				value: actions
 			});
+
+			// ^^^ bind first, fixes #66
+			super.connectedCallback();
 		}
 
 		disconnectedCallback() {
-			super.disconnectedCallback();
 			unbind(this);
+			super.disconnectedCallback();
 		}
 
 		/**
