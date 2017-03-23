@@ -57,7 +57,8 @@
   "xo": {
     "next": true,
     "ignore": [
-      "lib/**"
+      "lib/**",
+      "test/**"
     ],
     "overrides": [
       {

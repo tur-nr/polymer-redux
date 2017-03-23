@@ -34,10 +34,6 @@ export default function PolymerRedux(store) {
 	 * @return {Function} Update function.
 	 */
 	const bind = (element, properties) => {
-		if (subscribers.has(element)) {
-			return;
-		}
-
 		const bindings = Object.keys(properties)
 			.filter(name => {
 				const property = properties[name];
@@ -128,7 +124,7 @@ export default function PolymerRedux(store) {
 		constructor(...args) {
 			super(...args);
 
-			// collect the action creators first as property changes trigger
+			// Collect the action creators first as property changes trigger
 			// dispatches from observers, see #65, #66, #67
 			const actions = collect(this.constructor, 'actions');
 			Object.defineProperty(this, '_reduxActions', {
@@ -168,9 +164,7 @@ export default function PolymerRedux(store) {
 			// Action creator
 			let [action] = args;
 			if (typeof action === 'string') {
-				if (!actions) {
-					throw new TypeError(`PolyerRedux: <${this.constructor.is}> has no actions defined.`);
-				} else if (typeof actions[action] !== 'function') {
+				if (typeof actions[action] !== 'function') {
 					throw new TypeError(`PolymerRedux: <${this.constructor.is}> invalid action creator "${action}"`);
 				}
 				action = actions[action](...args.slice(1));

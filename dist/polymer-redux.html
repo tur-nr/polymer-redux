@@ -66,10 +66,6 @@ function PolymerRedux(store) {
   * @return {Function} Update function.
   */
 	var bind = function bind(element, properties) {
-		if (subscribers.has(element)) {
-			return;
-		}
-
 		var bindings = Object.keys(properties).filter(function (name) {
 			var property = properties[name];
 			if (Object.prototype.hasOwnProperty.call(property, 'statePath')) {
@@ -161,7 +157,7 @@ function PolymerRedux(store) {
 			constructor() {
 				super(...arguments);
 
-				// collect the action creators first as property changes trigger
+				// Collect the action creators first as property changes trigger
 				// dispatches from observers, see #65, #66, #67
 				var actions = collect(this.constructor, 'actions');
 				Object.defineProperty(this, '_reduxActions', {
@@ -208,9 +204,7 @@ function PolymerRedux(store) {
 				var action = args[0];
 
 				if (typeof action === 'string') {
-					if (!actions) {
-						throw new TypeError('PolyerRedux: <' + this.constructor.is + '> has no actions defined.');
-					} else if (typeof actions[action] !== 'function') {
+					if (typeof actions[action] !== 'function') {
 						throw new TypeError('PolymerRedux: <' + this.constructor.is + '> invalid action creator "' + action + '"');
 					}
 					action = actions[action].apply(actions, _toConsumableArray(args.slice(1)));
