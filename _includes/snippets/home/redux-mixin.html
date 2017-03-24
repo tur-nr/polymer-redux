@@ -1,0 +1,10 @@
+<link rel="import" href="polymer-redux.html">
+<script>
+  // Setup a Redux store
+  const initial = { message: 'Redux is awesome.' };
+  const reducer = (state = initial, action) => state;
+  const store = Redux.createStore(reducer);
+  
+  // Create the Polymer mixin
+  ReduxMixin = PolymerRedux(store);
+</script>

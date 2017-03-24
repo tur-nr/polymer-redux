@@ -1,0 +1,21 @@
+<link rel="import" href="polymer.html">
+<link rel="import" href="redux-mixin.html">
+<dom-module id="redux-demo">
+  <template>
+    <p>Polymer says: [[message]]</p>
+  </template>
+  <script>
+    // Extend the mixin...
+    class ReduxDemo extends ReduxMixin(Polymer.Element) {
+      static get properties() {
+        return {
+          message: {
+            type: String,
+            statePath: 'message' // ...and let the magic begin!
+          }
+        };
+      }
+    }
+    customElements.define(ReduxDemo.is, ReduxDemo);
+  </script>
+</dom-module>
