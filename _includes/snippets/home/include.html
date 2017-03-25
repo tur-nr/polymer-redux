@@ -1,18 +1,43 @@
-<ul class="tabs" role="tablist">
-  <li class="active">
-    <i class="fa fa-code"></i>
-    redux-demo.html
-  </li>
-  <li>
-    <i class="fa fa-code"></i>
-    redux-demo.html
-  </li>
-  <li>
-    <i class="fa fa-code"></i>
-    redux-demo.html
-  </li>
-  <li>
-    <i class="fa fa-eye"></i>
-    Demo
-  </li>
-</ul>
+<div class="tabs">
+  <ul role="tablist">
+    <li class="active" data-tab="redux-demo">
+      <i class="fa fa-code"></i>
+      redux-demo.html
+    </li>
+    <li data-tab="redux-mixin">
+      <i class="fa fa-code"></i>
+      redux-mixin.html
+    </li>
+    <li data-tab="main">
+      <i class="fa fa-code"></i>
+      main.html
+    </li>
+    <li data-tab="demo">
+      <i class="fa fa-eye"></i>
+      Demo
+    </li>
+  </ul>
+  <div class="content">
+    <div class="active" data-tab="redux-demo">
+      {% highlight html %}<link rel="import" href="polymer.html">
+<link rel="import" href="redux-mixin.html">
+{% include snippets/home/redux-demo.html %}{% endhighlight %}
+    </div>
+    <div data-tab="redux-mixin">
+      {% highlight html %}<link rel="import" href="polymer-redux.html">
+{% include snippets/home/redux-mixin.html %}{% endhighlight %}
+    </div>
+    <div data-tab="main">
+      {% highlight html %}{% include snippets/home/main.html %}{% endhighlight %}
+    </div>
+    <div data-tab="demo" class="demo">
+      <link rel="import" href="{{ '/assets/demos/home/main.html?v=' | append: site.github.build_revision | relative_url }}">
+      <redux-demo></redux-demo>
+      <hr>
+      <div>
+        <p>Try it out: <input id="demo-home-input" type="text" placeholder="message...">
+        <i style="float: right;"><small><a href="https://github.com/gaearon/redux-devtools">Redux DevTools</a></small></i></p>
+      </div>
+    </div>
+  </div>
+</div>
