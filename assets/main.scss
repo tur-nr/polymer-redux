@@ -96,3 +96,17 @@ figure.highlight {
     height: 100%;
   }
 }
+
+.project-name a,
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a {
+  color: inherit;
+
+  &:hover {
+    text-decoration: inherit;
+  }
+}
