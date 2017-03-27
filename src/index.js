@@ -121,8 +121,8 @@ export default function PolymerRedux(store) {
 	 * @return {Function} PolymerRedux mixed class.
 	 */
 	return parent => class ReduxMixin extends parent {
-		constructor(...args) {
-			super(...args);
+		constructor() {
+			super();
 
 			// Collect the action creators first as property changes trigger
 			// dispatches from observers, see #65, #66, #67

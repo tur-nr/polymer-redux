@@ -97,11 +97,6 @@ describe('#PolymerRedux', () => {
 		});
 
 		describe('.constructor()', () => {
-			it('should call super() w/ args', () => {
-				new (ReduxMixin(Parent))('foo');
-				expect(constructor).toHaveBeenCalledWith('foo');
-			});
-
 			it('should subscribe to redux store', () => {
 				new (ReduxMixin(Parent))();
 				expect(store.subscribe).toHaveBeenCalled();
