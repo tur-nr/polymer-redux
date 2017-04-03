@@ -9,7 +9,7 @@
     }
 })(this, function() {
     var twoWayWarning = 'Polymer Redux: <%s>.%s has "notify" enabled, two-way bindings goes against Redux\'s paradigm';
-    var actionsWarning = 'Polymyer Redux: <%s>.actions inaccessible property. "actions" is reserved for Action Creators.';
+    var actionsWarning = 'Polymer Redux: <%s>.actions inaccessible property. "actions" is reserved for Action Creators.';
 
     /**
      * Returns property bindings found on a given Element/Behavior.
