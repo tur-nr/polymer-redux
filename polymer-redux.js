@@ -8,7 +8,8 @@
         global['PolymerRedux'] = factory();
     }
 })(this, function() {
-    var warning = 'Polymer Redux: <%s>.%s has "notify" enabled, two-way bindings goes against Redux\'s paradigm';
+    var twoWayWarning = 'Polymer Redux: <%s>.%s has "notify" enabled, two-way bindings goes against Redux\'s paradigm';
+    var actionsWarning = 'Polymyer Redux: <%s>.actions inaccessible property. "actions" is reserved for Action Creators.';
 
     /**
      * Returns property bindings found on a given Element/Behavior.
@@ -25,10 +26,15 @@
         if (obj.properties != null) {
             Object.keys(obj.properties).forEach(function(name) {
                 var prop = obj.properties[name];
+                // actions, inaccessible property
+                if (name === 'actions') {
+                    console.warn(actionsWarning, element.is);
+                }
+
                 if (prop.hasOwnProperty('statePath')) {
                     // notify flag, warn against two-way bindings
                     if (prop.notify && !prop.readOnly) {
-                        console.warn(warning, element.is, name);
+                        console.warn(twoWayWarning, element.is, name);
                     }
                     props.push({
                         name: name,
