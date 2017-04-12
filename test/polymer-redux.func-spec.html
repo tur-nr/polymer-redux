@@ -95,6 +95,9 @@
                             },
                             none: {
                                 type: String
+                            },
+                            actions: {
+                                type: String,
                             }
                         }
                     });
@@ -121,9 +124,17 @@
                     it('should warn againgst "notify" flag on properties', function() {
                         sinon.assert.calledWithMatch(
                             this.warnSpy,
-                            sinon.match.string,
+                            sinon.match(/two-way bindings/),
                             sinon.match(this.propertyElement.is),
                             sinon.match('warn')
+                        );
+                    });
+
+                    it('should warn of inaccessible "actions" properties', function() {
+                        sinon.assert.calledWithMatch(
+                            this.warnSpy,
+                            sinon.match(/inaccessible property/),
+                            sinon.match(this.propertyElement.is)
                         );
                     });
 
