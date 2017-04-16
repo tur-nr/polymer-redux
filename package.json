@@ -2,7 +2,7 @@
   "name": "polymer-redux",
   "version": "0.1.0",
   "description": "Polymer bindings for Redux.",
-  "main": "lib/polymer-redux.js",
+  "main": "lib/index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
     "build": "gulp",
