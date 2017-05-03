@@ -22,6 +22,7 @@ const store = {
 };
 
 const constructor = jest.fn();
+const connectedCallback = jest.fn();
 const disconnectedCallback = jest.fn();
 const setProperty = jest.fn();
 const dispatchEvent = jest.fn();
@@ -29,6 +30,10 @@ const dispatchEvent = jest.fn();
 class Parent {
 	constructor(...args) {
 		constructor(...args);
+	}
+
+	connectedCallback() {
+		connectedCallback();
 	}
 
 	disconnectedCallback() {
@@ -97,26 +102,43 @@ describe('#PolymerRedux', () => {
 		});
 
 		describe('.constructor()', () => {
+			it('should define ._reduxAction property', () => {
+				const e = new (ReduxMixin(Parent))();
+				expect(typeof e._reduxActions).toBe('object');
+			});
+		});
+
+		describe('.connectedCallback()', () => {
 			it('should subscribe to redux store', () => {
-				new (ReduxMixin(Parent))();
+				const e = new (ReduxMixin(Parent))();
+				e.connectedCallback();
 				expect(store.subscribe).toHaveBeenCalled();
+			});
+
+			it('should call super.connectedCallback()', () => {
+				const e = new (ReduxMixin(Parent))();
+				e.connectedCallback();
+				expect(connectedCallback).toHaveBeenCalled();
 			});
 
 			describe('bindings', () => {
 				it('should have initial properties set with statePath', () => {
 					window.Polymer.Path.get.mockReturnValueOnce('foo');
 					const e = new (ReduxMixin(ParentWithProps))();
+					e.connectedCallback();
 					expect(e.foo).toBe('foo');
 				});
 
 				it('should set readOnly property via _setProperty()', () => {
 					statePath.mockReturnValueOnce('bar');
-					new (ReduxMixin(ParentWithProps))();
+					const e = new (ReduxMixin(ParentWithProps))();
+					e.connectedCallback();
 					expect(setProperty).toHaveBeenCalledWith('bar', 'bar');
 				});
 
 				it('should warn against two-way bindings notify option', () => {
-					new (ReduxMixin(ParentWithProps))();
+					const e = new (ReduxMixin(ParentWithProps))();
+					e.connectedCallback();
 					expect(konsole.warn).toHaveBeenCalledWith(
 						expect.stringMatching(/<parent-props>.baz has "notify" enabled/)
 					);
@@ -125,6 +147,7 @@ describe('#PolymerRedux', () => {
 
 			describe('store subscriber', () => {
 				const element = new (ReduxMixin(ParentWithProps))();
+				element.connectedCallback();
 				const listener = store.subscribe.mock.calls[0][0];
 
 				it('should get the state from the store', () => {
@@ -159,6 +182,7 @@ describe('#PolymerRedux', () => {
 				const off = jest.fn();
 				store.subscribe.mockReturnValueOnce(off);
 				const e = new (ReduxMixin(Parent))();
+				e.connectedCallback();
 				e.disconnectedCallback();
 				expect(off).toHaveBeenCalled();
 			});

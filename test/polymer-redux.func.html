@@ -188,6 +188,31 @@
 			</script>
 		</dom-module>
 
+		<dom-module id="fixture-four">
+			<script>
+				class FixtureFour extends ReduxMixin(Polymer.Element) {
+					static get is() { return 'fixture-four'; }
+					static get properties() {
+						return {
+							foo: {
+								statePath: 'foo'
+							}
+						};
+					}
+					static get actions() {
+						return {
+							foo: function() {
+								return {
+									type: 'FOO'
+								};
+							}
+						};
+					}
+				}
+				window.customElements.define(FixtureFour.is, FixtureFour);
+			</script>
+		</dom-module>
+
     <test-fixture id="one">
       <template>
         <fixture-one></fixture-one>
@@ -203,6 +228,12 @@
     <test-fixture id="issue-66">
       <template>
         <fixture-three></fixture-three>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="issue-77">
+      <template>
+        <fixture-four></fixture-four>
       </template>
     </test-fixture>
 
@@ -322,6 +353,22 @@
 			describe('issue #66', function() {
 				it('should have actions available', function() {
 					fixture('issue-66');
+				})
+			});
+
+			describe('issue #77', function() {
+				it('should rebind on connectedCallback()', function() {
+					const element = fixture('issue-77');
+					const parent = element.parentNode;
+					const foo = element.foo;
+
+					// remove and append
+					parent.removeChild(element);
+					parent.appendChild(element);
+
+					element.dispatch('foo');
+
+					assert.equal(store.getState().foo, element.foo);
 				})
 			});
     </script>

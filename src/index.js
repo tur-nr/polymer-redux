@@ -131,14 +131,17 @@ export default function PolymerRedux(store) {
 				configurable: true,
 				value: actions
 			});
+		}
 
+		connectedCallback() {
+			super.connectedCallback();
 			const properties = collect(this.constructor, 'properties');
 			bind(this, properties);
 		}
 
 		disconnectedCallback() {
-			unbind(this);
 			super.disconnectedCallback();
+			unbind(this);
 		}
 
 		/**
