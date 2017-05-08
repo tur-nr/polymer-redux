@@ -40,7 +40,7 @@ Polymer uses [Class Mixins](http://justinfagnani.com/2015/12/21/real-mixins-with
 ```html
 <!-- src/demo-app/redux-mixin.html -->
 
-<link rel="../../bower_components/polymer-redux/polymer-redux.html">
+<link rel="import" href="../../bower_components/polymer-redux/polymer-redux.html">
 <script src="../../node_modules/redux/dist/redux.js"></script>
 <script>
   // Setup a Redux store
