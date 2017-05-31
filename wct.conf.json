@@ -1,16 +1,7 @@
 {
   "plugins": {
     "local": {
-      "browsers": ["chrome", "firefox"]
-    },
-    "istanbul": {
-      "dir": "./coverage",
-      "reporters": ["text-summary", "lcov"],
-      "include": [
-        "/polymer-redux.js"
-      ],
-      "exclude": [],
-      "thresholds": {}
+      "browsers": ["chrome"]
     }
   }
 }
