@@ -4,7 +4,7 @@ sudo: true
 
 language: node_js
 
-node_js: 4
+node_js: node
 
 addons:
   apt:
@@ -14,8 +14,7 @@ addons:
       - google-chrome-stable
 
 cache:
-  directories:
-    - node_modules
+  yarn: true
 
 before_script:
   - bower install
