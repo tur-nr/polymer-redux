@@ -26,7 +26,7 @@ export default function PolymerRedux(store) {
 	 *
 	 * @example
 	 *     const update = bind(el, props) // set bindings
-	 *     update(state) // manuel update
+	 *     update(state) // manual update
 	 *
 	 * @private
 	 * @param {HTMLElement} element

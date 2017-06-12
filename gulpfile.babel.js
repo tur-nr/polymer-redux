@@ -63,14 +63,16 @@ gulp.task('dist', ['build'], () => {
 		inlineScripts: true
 	});
 
-	return b.bundle([entry]).then(bundles => {
-		const {ast} = bundles.get(entry);
-		const html = serialize(ast);
+	return b.generateManifest([entry])
+		.then(manifest => b.bundle(manifest))
+		.then(bundles => {
+			const {ast} = bundles.documents.get(entry);
+			const html = serialize(ast);
 
-		mkdirSync('dist');
+			mkdirSync('dist');
 
-		return pify(writeFile)('dist/polymer-redux.html', `${html}\n`);
-	});
+			return pify(writeFile)('dist/polymer-redux.html', `${html}\n`);
+		});
 });
 
 gulp.task('develop', ['dist'], () => {

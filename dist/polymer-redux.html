@@ -1,27 +1,21 @@
-<html><head><script type="text/javascript">var PolymerRedux = (function () {
+<script type="text/javascript">var PolymerRedux = (function () {
 'use strict';
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
+var win;
 
-
-
-
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
+if (typeof window !== "undefined") {
+    win = window;
+} else if (typeof commonjsGlobal !== "undefined") {
+    win = commonjsGlobal;
+} else if (typeof self !== "undefined") {
+    win = self;
+} else {
+    win = {};
 }
 
-var window_1 = createCommonjsModule(function (module) {
-    if (typeof window !== "undefined") {
-        module.exports = window;
-    } else if (typeof commonjsGlobal !== "undefined") {
-        module.exports = commonjsGlobal;
-    } else if (typeof self !== "undefined") {
-        module.exports = self;
-    } else {
-        module.exports = {};
-    }
-});
+var window_1 = win;
 
 var console_1 = console;
 
@@ -247,4 +241,4 @@ function PolymerRedux(store) {
 return PolymerRedux;
 
 }());
-</script></head><body><div hidden="" by-polymer-bundler=""></div></body></html>
+</script>
