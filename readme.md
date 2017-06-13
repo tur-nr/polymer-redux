@@ -48,7 +48,7 @@ it's state and dispatch actions.
 
 ## Documentation
 
-See the documentation page: [https://tur-nr.github.io/polymer-redux/docs](https://tur-nr.github.io/polymer-redux/docs)
+See the documentation page: [https://tur-nr.github.io/polymer-redux/docs](https://tur-nr.github.io/polymer-redux/docs).
 
 ## API
 

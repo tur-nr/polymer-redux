@@ -9,6 +9,8 @@ const {CustomEvent, Polymer} = window;
  *
  * Creates a Class mixin for decorating Elements with a given Redux store.
  *
+ * @polymerMixin
+ *
  * @param {Object} store Redux store.
  * @return {Function} Class mixin.
  */
@@ -116,6 +118,8 @@ export default function PolymerRedux(store) {
 	 * @example
 	 *     const ReduxMixin = PolymerRedux(store)
 	 *     class Foo extends ReduxMixin(Polymer.Element) { }
+	 *
+	 * @polymerMixinClass
 	 *
 	 * @param {Polymer.Element} parent The polymer parent element.
 	 * @return {Function} PolymerRedux mixed class.

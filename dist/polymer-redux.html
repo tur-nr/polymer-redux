@@ -32,6 +32,8 @@ var Polymer = window_1.Polymer;
  *
  * Creates a Class mixin for decorating Elements with a given Redux store.
  *
+ * @polymerMixin
+ *
  * @param {Object} store Redux store.
  * @return {Function} Class mixin.
  */
@@ -52,7 +54,7 @@ function PolymerRedux(store) {
   *
   * @example
   *     const update = bind(el, props) // set bindings
-  *     update(state) // manuel update
+  *     update(state) // manual update
   *
   * @private
   * @param {HTMLElement} element
@@ -142,6 +144,8 @@ function PolymerRedux(store) {
   * @example
   *     const ReduxMixin = PolymerRedux(store)
   *     class Foo extends ReduxMixin(Polymer.Element) { }
+  *
+  * @polymerMixinClass
   *
   * @param {Polymer.Element} parent The polymer parent element.
   * @return {Function} PolymerRedux mixed class.
@@ -242,3 +246,4 @@ return PolymerRedux;
 
 }());
 </script>
+

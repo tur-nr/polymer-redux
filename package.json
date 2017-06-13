@@ -8,7 +8,7 @@
     "build": "gulp",
     "pretest": "npm run build && npm run lint",
     "test": "jest && polymer test",
-    "lint": "xo #&& polymer lint --root=$(pwd)/lib"
+    "lint": "xo && polymer lint --root=$(pwd)/lib"
   },
   "repository": {
     "type": "git",

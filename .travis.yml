@@ -4,9 +4,10 @@ sudo: true
 
 language: node_js
 
-node_js: node
+node_js: stable
 
 addons:
+  firefox: latest
   apt:
     sources:
       - google-chrome
