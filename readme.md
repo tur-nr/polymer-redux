@@ -1,7 +1,7 @@
 # Polymer Redux
 
-[![Build Status](https://travis-ci.org/tur-nr/polymer-redux.svg?branch=master)](https://travis-ci.org/tur-nr/polymer-redux)
-[![Coverage Status](https://coveralls.io/repos/github/tur-nr/polymer-redux/badge.svg?branch=master)](https://coveralls.io/github/tur-nr/polymer-redux?branch=master)
+[![Build Status](https://travis-ci.org/tur-nr/polymer-redux.svg?branch=develop%2Fv0)](https://travis-ci.org/tur-nr/polymer-redux)
+[![Coverage Status](https://coveralls.io/repos/github/tur-nr/polymer-redux/badge.svg?branch=develop%2Fv0)](https://coveralls.io/github/tur-nr/polymer-redux?branch=develop%2Fv0)
 
 Polymer bindings for Redux. Bind store state to properties and dispatch
 actions from within Polymer Elements.
@@ -12,16 +12,10 @@ libraries together allows developers to create powerful and complex
 applications faster and simpler. This approach allows the components you build
 with Polymer to be more focused on functionality than the applications state.
 
-## Polymer 2.0 Preview
-
-The Polymer team have released a preview of it's next major update, [Polymer 2.0](https://www.polymer-project.org/1.0/blog/2016-09-09-polymer-2.0). With this update comes a cleaner interface for setting properties on elements which is perfect for state management libraries like Redux.
-
-Checkout [`polymer-2`](https://github.com/tur-nr/polymer-redux/tree/polymer-2) branch to have a play with PolymerRedux and Polymer 2.0.
-
 ## Installation
 
 ```bash
-bower install --save polymer-redux
+bower install --save polymer-redux#0
 ```
 
 ## Usage
