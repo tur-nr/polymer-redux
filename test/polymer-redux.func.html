@@ -1,0 +1,376 @@
+<!doctype html>
+<html>
+  <head>
+    <title>polymer-redux test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+		<script src="../node_modules/redux/dist/redux.js"></script>
+		<script src="../node_modules/redux-thunk/dist/redux-thunk.js"></script>
+
+    <link rel="import" href="../polymer-redux.html">
+  </head>
+  <body>
+		<script>
+			initialState = {
+				foo: 'foo',
+				bar: 'bar',
+				baz: 'baz',
+				sub: {
+					path: {
+						qux: 'qux'
+					}
+				}
+			};
+			store = Redux.createStore(
+				function(state, action) {
+					switch (action.type) {
+						case 'FOO':
+							return Object.assign({}, state, {
+								foo: state.foo + ', foo'
+							});
+						case 'BAR':
+							return Object.assign({}, state, {
+								bar: state.bar + ', bar'
+							});
+						case 'BAZ':
+							return Object.assign({}, state, {
+								baz: state.baz + ', baz'
+							});
+						case 'QUX':
+							return Object.assign({}, state, {
+								sub: {
+									path: {
+										qux: state.sub.path.qux + ', qux'
+									}
+								}
+							});
+						default:
+							return state || initialState;
+					}
+				},
+				Redux.applyMiddleware(ReduxThunk.default)
+			);
+			ReduxMixin = PolymerRedux(store);
+		</script>
+
+		<dom-module id="fixture-one">
+			<script>
+				class FixtureOne extends ReduxMixin(Polymer.Element) {
+					static get is() { return 'fixture-one'; }
+					static get properties() {
+						return {
+							foo: {
+								statePath: 'foo'
+							},
+							bar: {
+								readOnly: true,
+								statePath: function(state) {
+									return state.bar;
+								}
+							},
+							baz: {
+								value: 'not baz'
+							},
+							qux: {
+								statePath: 'sub.path.qux'
+							}
+						};
+					}
+					static get actions() {
+						return {
+							action: function(type) {
+								return {
+									type: type
+								};
+							}
+						};
+					}
+				}
+				window.customElements.define(FixtureOne.is, FixtureOne);
+			</script>
+		</dom-module>
+
+		<dom-module id="fixture-two">
+			<script>
+				ExtendedMixin = function(Parent) {
+					return class ActionsMixin extends ReduxMixin(Parent) {
+						static get properties() {
+							return {
+								foo: {
+									statePath: 'foo'
+								},
+								bar: {
+									statePath: 'bar'
+								}
+							};
+						}
+
+						static get actions() {
+							return {
+								foo: function() {
+									return {
+										type: 'FOO'
+									};
+								},
+								bar: function() {
+									return {
+										type: 'BAR'
+									}
+								}
+							};
+						}
+					};
+				}
+
+				class FixtureTwo extends ExtendedMixin(Polymer.Element) {
+					static get is() { return 'fixture-two'; }
+					static get properties() {
+						return {
+							foo: {
+								statePath: 'foo',
+								observer: '_fooChanged'
+							},
+							bar: {
+								value: 'hijacked'
+							}
+						};
+					}
+					static get actions() {
+						return {
+							bar: function() {
+								return {
+									type: 'FOO'
+								};
+							},
+							baz: function() {
+								return {
+									type: 'BAZ'
+								}
+							}
+						};
+					}
+					_fooChanged() {
+						this.dispatch('baz');
+					}
+				}
+				window.customElements.define(FixtureTwo.is, FixtureTwo);
+			</script>
+		</dom-module>
+
+		<dom-module id="fixture-three">
+			<script>
+				class FixtureThree extends ReduxMixin(Polymer.Element) {
+					static get is() { return 'fixture-three'; }
+					static get properties() {
+						return {
+							foo: {
+								statePath: 'foo',
+								observer: '_fooChanged'
+							}
+						};
+					}
+					static get actions() {
+						return {
+							bar: function() {
+								return {
+									type: 'BAR'
+								};
+							}
+						};
+					}
+					_fooChanged() {
+						this.dispatch('bar');
+					}
+				}
+				window.customElements.define(FixtureThree.is, FixtureThree);
+			</script>
+		</dom-module>
+
+		<dom-module id="fixture-four">
+			<script>
+				class FixtureFour extends ReduxMixin(Polymer.Element) {
+					static get is() { return 'fixture-four'; }
+					static get properties() {
+						return {
+							foo: {
+								statePath: 'foo'
+							}
+						};
+					}
+					static get actions() {
+						return {
+							foo: function() {
+								return {
+									type: 'FOO'
+								};
+							}
+						};
+					}
+				}
+				window.customElements.define(FixtureFour.is, FixtureFour);
+			</script>
+		</dom-module>
+
+    <test-fixture id="one">
+      <template>
+        <fixture-one></fixture-one>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="two">
+      <template>
+        <fixture-two></fixture-two>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="issue-66">
+      <template>
+        <fixture-three></fixture-three>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="issue-77">
+      <template>
+        <fixture-four></fixture-four>
+      </template>
+    </test-fixture>
+
+    <script>
+      describe('polymer-redux', function() {
+        it('should have properties set to their initial values', function() {
+          const element = fixture('one');
+
+					const state = store.getState();
+
+          assert.equal(element.foo, state.foo);
+          assert.equal(element.bar, state.bar);
+          assert.notEqual(element.baz, state.baz);
+          assert.equal(element.qux, state.sub.path.qux);
+        });
+
+        it('should update binded properties only', function() {
+          const element = fixture('one');
+
+					element.dispatch({
+						type: 'FOO'
+					});
+
+					element.dispatch({
+						type: 'BAR'
+					});
+
+					element.dispatch({
+						type: 'BAZ'
+					});
+
+					element.dispatch({
+						type: 'QUX'
+					});
+
+					const state = store.getState();
+
+          assert.equal(element.foo, state.foo);
+          assert.equal(element.bar, state.bar);
+          assert.notEqual(element.baz, state.baz);
+          assert.equal(element.qux, state.sub.path.qux);
+        });
+
+        it('should dispatch action creators', function() {
+          const element = fixture('one');
+
+					element.dispatch('action', 'FOO');
+					element.dispatch('action', 'BAR');
+					element.dispatch('action', 'BAZ');
+					element.dispatch('action', 'QUX');
+
+					const state = store.getState();
+
+          assert.equal(element.foo, state.foo);
+          assert.equal(element.bar, state.bar);
+          assert.notEqual(element.baz, state.baz);
+          assert.equal(element.qux, state.sub.path.qux);
+        });
+
+				it('should return the current state', function() {
+          const element = fixture('one');
+					assert.equal(element.getState(), store.getState());
+				});
+
+				it('should fire "state-changed" event', function(done) {
+          const element = fixture('one');
+					element.addEventListener('state-changed', function(event) {
+						assert.deepEqual(event.detail, store.getState());
+						done();
+					});
+
+					element.dispatch('action', 'FOO');
+				});
+
+				it('should dispatch async action creators', function(done) {
+          const element = fixture('one');
+
+					element.dispatch(function(dispatch) {
+						setTimeout(function() {
+							dispatch('action', 'FOO');
+							const state = store.getState();
+							assert.equal(element.foo, state.foo);
+							done();
+						}, 100);
+					});
+				});
+
+				it('should inherit extended Mixin properties', function() {
+					const element = fixture('two');
+
+					const state = store.getState();
+
+          assert.equal(element.foo, state.foo);
+          assert.notEqual(element.bar, state.bar);
+				});
+
+				it('should inherit extended Mixin actions', function() {
+					const element = fixture('two');
+
+					element.dispatch('foo');
+
+					const state = store.getState();
+
+          assert.equal(element.foo, state.foo);
+				});
+
+				it('should not use extended Mixin actions that already exist', function() {
+					const element = fixture('two');
+					const state = store.getState();
+
+					element.dispatch('bar');
+
+          assert.notEqual(element.foo, state.foo);
+				});
+      });
+
+			describe('issue #66', function() {
+				it('should have actions available', function() {
+					fixture('issue-66');
+				})
+			});
+
+			describe('issue #77', function() {
+				it('should rebind on connectedCallback()', function() {
+					const element = fixture('issue-77');
+					const parent = element.parentNode;
+					const foo = element.foo;
+
+					// remove and append
+					parent.removeChild(element);
+					parent.appendChild(element);
+
+					element.dispatch('foo');
+
+					assert.equal(store.getState().foo, element.foo);
+				})
+			});
+    </script>
+  </body>
+</html>

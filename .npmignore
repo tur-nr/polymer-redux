@@ -1,0 +1,10 @@
+bower_components
+coverage
+test
+.babelrc
+.editorconfig
+.gitignore
+.npmignore
+.travis.yml
+gulpfile.babel.js
+wct.conf.json
