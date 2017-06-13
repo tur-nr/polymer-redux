@@ -18,7 +18,7 @@ Polymer is a modern library for creating [Web Components](https://github.com/w3c
 ## [Install](#install) {#install}
 
 ```
-bower install --save polymer-redux#polymer-2
+bower install --save polymer-redux
 ```
 
 <small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: `polymer-redux` [NPM](https://www.npmjs.com/package/polymer-redux) package available.</small>
