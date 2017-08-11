@@ -106,7 +106,7 @@ export default function PolymerRedux(store) {
 	const collect = (what, which) => {
 		let res = {};
 		while (what) {
-			res = {...what[which], ...res}; // Respect prototype priority
+			res = Object.assign({}, what[which], res); // Respect prototype priority
 			what = Object.getPrototypeOf(what);
 		}
 		return res;
