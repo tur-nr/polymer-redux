@@ -42,7 +42,7 @@ gulp.task('build:lib', () => {
 					]
 				}]],
 				plugins: [
-					'transform-object-rest-spread'
+					'transform-object-assign'
 				]
 			})
 		]
