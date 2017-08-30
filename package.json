@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/tur-nr/polymer-redux#readme",
   "dependencies": {
+    "@polymer/polymer": "next",
     "global": "^4.3.1"
   },
   "devDependencies": {
