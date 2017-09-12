@@ -187,6 +187,12 @@ export default function PolymerRedux(store) {
 					});
 					return originalAction(...args);
 				};
+
+				// Copy props from the original action to the proxy.
+				// see https://github.com/tur-nr/polymer-redux/issues/98
+				Object.keys(originalAction).forEach(prop => {
+					action[prop] = originalAction[prop];
+				});
 			}
 
 			return store.dispatch(action);
