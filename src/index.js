@@ -60,7 +60,7 @@ export default function PolymerRedux(store) {
 				const {statePath, readOnly} = properties[name];
 				const value = (typeof statePath === 'function') ?
 					statePath.call(element, state) :
-					Path.get(state, statePath);
+					get(state, statePath);
 
 				if (readOnly) {
 					element._setProperty(name, value);
