@@ -80,6 +80,7 @@ function PolymerRedux(store) {
    * @param {Object} state
    */
 		var update = function update(state) {
+			var propertiesChanged = false;
 			bindings.forEach(function (name) {
 				var _properties$name = properties[name],
 				    statePath = _properties$name.statePath,
@@ -90,9 +91,13 @@ function PolymerRedux(store) {
 				if (readOnly) {
 					element._setProperty(name, value);
 				} else {
-					element[name] = value;
+					element._setPendingPropertyOrPath(name, value);
+					propertiesChanged = true;
 				}
 			});
+			if (propertiesChanged) {
+				element._invalidateProperties();
+			}
 		};
 
 		// Redux listener

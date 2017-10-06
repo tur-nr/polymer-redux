@@ -55,6 +55,7 @@ export default function PolymerRedux(store) {
 		 * @param {Object} state
 		 */
 		const update = state => {
+			let propertiesChanged = false;
 			bindings.forEach(name => {
 				const {statePath, readOnly} = properties[name];
 				const value = (typeof statePath === 'function') ?
@@ -64,9 +65,13 @@ export default function PolymerRedux(store) {
 				if (readOnly) {
 					element._setProperty(name, value);
 				} else {
-					element[name] = value;
+					element._setPendingPropertyOrPath(name, value);
+					propertiesChanged = true;
 				}
 			});
+			if (propertiesChanged) {
+				element._invalidateProperties();
+			}
 		};
 
 		// Redux listener
