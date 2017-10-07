@@ -5,8 +5,8 @@ title: Polymer Redux
 heading: Polymer ❤ Redux
 tagline: Polymer bindings for Redux.
 
-baseurl: ""
-url: "http://tur-nr.github.io/polymer-redux"
+baseurl: "/polymer-redux"
+url: "http://tur-nr.github.io"
 
 # Build settings
 markdown: kramdown
