@@ -56,18 +56,14 @@ export default function PolymerRedux(store) {
 		 */
 		const update = state => {
 			let propertiesChanged = false;
-			bindings.forEach(name => {
-				const {statePath, readOnly} = properties[name];
+			bindings.forEach(name => { // Perhaps .reduce() to a boolean?
+				const {statePath} = properties[name];
 				const value = (typeof statePath === 'function') ?
 					statePath.call(element, state) :
 					Polymer.Path.get(state, statePath);
 
-				if (readOnly) {
-					element._setProperty(name, value);
-				} else {
-					element._setPendingPropertyOrPath(name, value);
-					propertiesChanged = true;
-				}
+				const changed = element._setPendingPropertyOrPath(name, value, true);
+				propertiesChanged = propertiesChanged || changed;
 			});
 			if (propertiesChanged) {
 				element._invalidateProperties();

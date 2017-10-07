@@ -82,18 +82,13 @@ function PolymerRedux(store) {
 		var update = function update(state) {
 			var propertiesChanged = false;
 			bindings.forEach(function (name) {
-				var _properties$name = properties[name],
-				    statePath = _properties$name.statePath,
-				    readOnly = _properties$name.readOnly;
+				// Perhaps .reduce() to a boolean?
+				var statePath = properties[name].statePath;
 
 				var value = typeof statePath === 'function' ? statePath.call(element, state) : Polymer.Path.get(state, statePath);
 
-				if (readOnly) {
-					element._setProperty(name, value);
-				} else {
-					element._setPendingPropertyOrPath(name, value);
-					propertiesChanged = true;
-				}
+				var changed = element._setPendingPropertyOrPath(name, value, true);
+				propertiesChanged = propertiesChanged || changed;
 			});
 			if (propertiesChanged) {
 				element._invalidateProperties();
