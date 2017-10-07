@@ -10,8 +10,45 @@ Bind store state to properties and dispatch actions from within Polymer Elements
 
 Polymer is a modern library for creating [Web Components](https://github.com/w3c/webcomponents) within an application. Redux is a state container for managing predictable data. Joining the two libraries together allows developers to create powerful and complex applications faster and simpler. This approach allows the components you build with Polymer to be more focused on functionality than the applications state.
 
-<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: This documentation presumes an application has been initialised with [`polymer-cli@next`](https://github.com/Polymer/polymer-cli).</small>  
+<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: This documentation presumes an application has been initialised with [`polymer-cli`](https://github.com/Polymer/polymer-cli).</small>
 <small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: This documentation won't go into specifics of how to use Redux, read the it's [documentation](http://redux.js.org).</small>
+
+---
+
+## [Caveats](#caveats) {#caveats}
+
+Before choosing Redux as your state management solution for your Polymer application, it is good to know the limiations it brings.
+
+
+### [Observing Arrays/Objects](#observing-arrays-objects) {#observing-arrays-objects}
+
+Observing [object sub properties](https://www.polymer-project.org/2.0/docs/devguide/observers#observing-path-changes) and [array mutations](https://www.polymer-project.org/2.0/docs/devguide/observers#array-observation) does not work with PolymerRedux. Redux state is immutable by design, reducers must always return new state. This means that when mutating arrays or objects your reducer will look something similar to below.
+
+```js
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'push':
+      return {
+        ...state,
+        array: [
+          ...array,
+          action.value
+        ]
+      }
+    
+    case 'sub-prop':
+      return {
+        ...state,
+        object: {
+          ...state.object,
+          subProp: action.value
+        }
+      };
+  }
+}
+```
+
+As you can see `state.object` and `state.array` are completely new objects/arrays. When using PolymerRedux to bind these properties it will set the new value to the Elements property. The property effects of Polymer is that of a new value and not a splice or sub property change.
 
 ---
 
@@ -102,7 +139,7 @@ class DemoApp extends ReduxMixin(Polymer.Element) {
 
 Now whenever the Redux store changes the value of `message` in the state, so to will the property.
 
-<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: Paths can use dot notation for nested values. `user.name` and `user.friends.0.name` are legal paths.</small>  
+<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: Paths can use dot notation for nested values. `user.name` and `user.friends.0.name` are legal paths.</small>
 
 #### [Dynamic Binding (Selectors)](#dynamic-binding) {#dynamic-binding}
 
@@ -127,8 +164,8 @@ class DemoApp extends ReduxMixin(Polymer.Element) {
 }
 ```
 
-<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: Selectors are [*pure*](https://medium.com/javascript-scene/master-the-javascript-interview-what-is-a-pure-function-d1c076bec976#.3dg24hk2m) functions.</small>  
-<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: To bind a property to the full state just return it `statePath(state) { return state; }`.</small>  
+<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: Selectors are [*pure*](https://medium.com/javascript-scene/master-the-javascript-interview-what-is-a-pure-function-d1c076bec976#.3dg24hk2m) functions.</small>
+<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: To bind a property to the full state just return it `statePath(state) { return state; }`.</small>
 <small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: Check out [Reselect](https://github.com/reactjs/reselect) for a cleaner approach to create selectors.</small>
 
 #### [Inherited Properties](#inherited-properties) {#inherited-properties}
@@ -153,8 +190,8 @@ It is also possible to share properties across multiple Elements using Class Mix
 </script>
 ```
 
-<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: Property bindings respect the prototypal inheritance model.</small>  
-<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: An Element's property bindings are *final*.</small>  
+<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: Property bindings respect the prototypal inheritance model.</small>
+<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: An Element's property bindings are *final*.</small>
 
 
 #### [Two-Way Binding](#two-way-binding) {#two-way-binding}
@@ -269,7 +306,7 @@ Like [Inherited Properties](#inherited-properties) it is also possible to inheri
 </script>
 ```
 
-<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: Actions respect the prototypal inheritance model.</small>  
+<small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: Actions respect the prototypal inheritance model.</small>
 <small><i class="fa fa-info-circle" aria-hidden="true"></i> ***Info***: An Element's actions are *final*.</small>
 
 #### [Asynchronous Actions](#async-actions) {#async-actions}

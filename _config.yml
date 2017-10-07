@@ -17,3 +17,5 @@ gems:
 exclude:
   - Gemfile
   - Gemfile.lock
+  - bower_components
+  - node_modules
