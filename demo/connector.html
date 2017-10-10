@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+
+		<title>polymer-redux Connector Demo</title>
+
+		<script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+		<link rel="import" href="../polymer-redux.html">
+		<link rel="import" href="./redux-mixin.html">
+	</head>
+	<body>
+		<dom-module id="office-quotes">
+			<template>
+				<p>[[message]]</p>
+				<button on-click="handleUpdateMessage">Update quote</button>
+			</template>
+			<script>
+				/**
+				 * Create our "pure" Element.
+				 *
+				 */
+				class OfficeQuotes extends Polymer.Element {
+					static get is() { return 'office-quotes'; }
+
+					// Properties have NO statePath
+					static get properties() {
+						return {
+							message: {
+								type: String
+							}
+						};
+					}
+
+					handleUpdateMessage() {
+						// We dispatch native events to cause actions
+						this.dispatchEvent(new CustomEvent('update-quote', {
+							detail: {
+								message: 'Nothing changes by staying the same, quite literally.'
+							}
+						}));
+					}
+				}
+
+				/**
+				 * To bind state to properties, we define a function that will select
+				 * the state values for the property bindings.
+				 *
+				 */
+				function mapStateToProps(state) {
+					return {
+						message: state.message,
+					};
+				}
+
+				/**
+				 * Mapping element events to dispatch a Redux action. This is only called
+				 * once, during the contructor() method. Each event listener will be given
+				 * the `event` object and the `state` object which is the current store state.
+				 *
+				 */
+				function mapEventToDispatch(dispatch) {
+					return {
+						// the method name is the actual event name
+						['update-quote'](event, state) {
+							dispatch({
+								type: 'UPDATE_MESSAGE',
+								message: event.detail.message
+							});
+						}
+					};
+				}
+
+				// Then generate our ConnectedElement using the "pure" one and our mapping functions
+				const ConnectedQuotes = ReduxMixin(OfficeQuotes, mapStateToProps, mapEventToDispatch);
+				window.customElements.define(ConnectedQuotes.is, ConnectedQuotes);
+			</script>
+		</dom-module>
+
+		<office-quotes></office-quotes>
+	</body>
+</html>

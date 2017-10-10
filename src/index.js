@@ -9,8 +9,6 @@ const {CustomEvent, Polymer} = window;
  *
  * Creates a Class mixin for decorating Elements with a given Redux store.
  *
- * @polymerMixin
- *
  * @param {Object} store Redux store.
  * @return {Function} Class mixin.
  */
@@ -35,13 +33,15 @@ export default function PolymerRedux(store) {
 	 * @param {Object} properties
 	 * @return {Function} Update function.
 	 */
-	const bind = (element, properties) => {
+	const bind = (element, properties, mapStateToProps) => {
+		const elementName = element.constructor.is;
+
 		const bindings = Object.keys(properties)
 			.filter(name => {
 				const property = properties[name];
 				if (Object.prototype.hasOwnProperty.call(property, 'statePath')) {
 					if (!property.readOnly && property.notify) {
-						console.warn(`PolymerRedux: <${element.constructor.is}>.${name} has "notify" enabled, two-way bindings goes against Redux's paradigm`);
+						console.warn(`PolymerRedux: <${elementName}>.${name} has "notify" enabled, two-way bindings goes against Redux's paradigm.`);
 					}
 					return true;
 				}
@@ -55,19 +55,22 @@ export default function PolymerRedux(store) {
 		 * @param {Object} state
 		 */
 		const update = state => {
-			let propertiesChanged = false;
-			bindings.forEach(name => { // Perhaps .reduce() to a boolean?
-				const {statePath} = properties[name];
+			const mappedState = mapStateToProps ? mapStateToProps(state) : {};
+			const updates = bindings.reduce((props, name) => {
+				const statePath = properties[name].statePath;
 				const value = (typeof statePath === 'function') ?
 					statePath.call(element, state) :
 					Polymer.Path.get(state, statePath);
 
-				const changed = element._setPendingPropertyOrPath(name, value, true);
-				propertiesChanged = propertiesChanged || changed;
-			});
-			if (propertiesChanged) {
-				element._invalidateProperties();
-			}
+				// Warn about double bindings
+				if (props[name]) {
+					console.warn(`PolymerRedux: <${elementName}>.${name} has double bindings, statePath binding has priority.`);
+				}
+
+				return Object.assign({}, props, {[name]: value});
+			}, mappedState);
+
+			element.setProperties(updates, true);
 		};
 
 		// Redux listener
@@ -115,98 +118,160 @@ export default function PolymerRedux(store) {
 	};
 
 	/**
+	 * Adds events listeners to a element.
+	 *
+	 * @param {HTMLElement} element
+	 * @param {Object} listeners List of event listeners to add.
+	 */
+	function addListeners(element, listeners) {
+		Object.keys(listeners).forEach(name => {
+			element.addEventListener(name, listeners[name]);
+		});
+	}
+
+	/**
+	 * Removes events listeners from an element.
+	 *
+	 * @param {HTMLElement} element
+	 * @param {Object} listeners List of event listeners to remove.
+	 */
+	function removeListeners(element, listeners) {
+		Object.keys(listeners).forEach(name => {
+			element.removeEventListeners(name, listeners[name]);
+		});
+	}
+
+	/**
 	 * ReduxMixin
 	 *
 	 * @example
 	 *     const ReduxMixin = PolymerRedux(store)
 	 *     class Foo extends ReduxMixin(Polymer.Element) { }
 	 *
-	 * @polymerMixinClass
+	 * @polymer
+	 * @mixinFunction
 	 *
 	 * @param {Polymer.Element} parent The polymer parent element.
 	 * @return {Function} PolymerRedux mixed class.
 	 */
-	return parent => class ReduxMixin extends parent {
-		constructor() {
-			super();
-
-			// Collect the action creators first as property changes trigger
-			// dispatches from observers, see #65, #66, #67
-			const actions = collect(this.constructor, 'actions');
-			Object.defineProperty(this, '_reduxActions', {
-				configurable: true,
-				value: actions
-			});
+	return function (parent, mapStateToProps, mapEventsToDispatch) {
+		if (mapStateToProps && typeof mapStateToProps !== 'function') {
+			throw new TypeError('PolymerRedux: expects mapStateToProps to be a function');
 		}
 
-		connectedCallback() {
-			super.connectedCallback();
-			const properties = collect(this.constructor, 'properties');
-			bind(this, properties);
-		}
-
-		disconnectedCallback() {
-			super.disconnectedCallback();
-			unbind(this);
+		if (mapEventsToDispatch && typeof mapEventsToDispatch !== 'function') {
+			throw new TypeError('PolymerRedux: expects mapEventsToDispatch to be a function');
 		}
 
 		/**
-		 * Dispatches an action to the Redux store.
-		 *
-		 * @example
-		 *     element.dispatch({ type: 'ACTION' })
-		 *
-		 * @example
-		 *     element.dispatch('actionCreator', 'foo', 'bar')
-		 *
-		 * @example
-		 *     element.dispatch((dispatch) => {
-		 *         dispatch({ type: 'MIDDLEWARE'})
-		 *     })
-		 *
-		 * @param  {...*} args
-		 * @return {Object} The action.
+		 * @polymer
+		 * @mixinClass
 		 */
-		dispatch(...args) {
-			const actions = this._reduxActions;
+		return class ReduxMixin extends parent {
+			constructor() {
+				super();
 
-			// Action creator
-			let [action] = args;
-			if (typeof action === 'string') {
-				if (typeof actions[action] !== 'function') {
-					throw new TypeError(`PolymerRedux: <${this.constructor.is}> invalid action creator "${action}"`);
-				}
-				action = actions[action](...args.slice(1));
-			}
+				// Collect the action creators first as property changes trigger
+				// dispatches from observers, see #65, #66, #67
+				const reduxActions = collect(this.constructor, 'actions');
 
-			// Proxy async dispatch
-			if (typeof action === 'function') {
-				const originalAction = action;
-				action = (...args) => {
-					// Replace redux dispatch
-					args.splice(0, 1, (...args) => {
-						return this.dispatch(...args);
+				// If we have any mapped events to dispatch, build the liseners object
+				const mappedEvents = mapEventsToDispatch ?
+					mapEventsToDispatch((...args) => this.dispatch(...args)) :
+					{};
+
+				// Bind the listeners to call with the event and the current state
+				const reduxMappedListeners = Object.keys(mappedEvents).reduce((listeners, name) => {
+					return Object.assign({}, listeners, {
+						[name](event) {
+							event.stopImmediatePropagation();
+							mappedEvents[name](event, store.getState());
+						}
 					});
-					return originalAction(...args);
-				};
+				}, {});
 
-				// Copy props from the original action to the proxy.
-				// see https://github.com/tur-nr/polymer-redux/issues/98
-				Object.keys(originalAction).forEach(prop => {
-					action[prop] = originalAction[prop];
+				// Define properties
+				Object.defineProperties(this, {
+					_reduxActions: {
+						value: reduxActions
+					},
+					_reduxMappedListeners: {
+						value: reduxMappedListeners
+					}
 				});
 			}
 
-			return store.dispatch(action);
-		}
+			connectedCallback() {
+				super.connectedCallback();
+				const properties = collect(this.constructor, 'properties');
+				bind(this, properties, mapStateToProps);
+				addListeners(this, this._reduxMappedListeners);
+			}
 
-		/**
-		 * Gets the current state in the Redux store.
-		 *
-		 * @return {*}
-		 */
-		getState() {
-			return store.getState();
-		}
+			disconnectedCallback() {
+				super.disconnectedCallback();
+				unbind(this);
+				removeListeners(this, this._reduxMappedListeners);
+			}
+
+			/**
+			 * Dispatches an action to the Redux store.
+			 *
+			 * @example
+			 *     element.dispatch({ type: 'ACTION' })
+			 *
+			 * @example
+			 *     element.dispatch('actionCreator', 'foo', 'bar')
+			 *
+			 * @example
+			 *     element.dispatch((dispatch) => {
+			 *         dispatch({ type: 'MIDDLEWARE'})
+			 *     })
+			 *
+			 * @param  {...*} args
+			 * @return {Object} The action.
+			 */
+			dispatch(...args) {
+				const actions = this._reduxActions;
+
+				// Action creator
+				let [action] = args;
+				if (typeof action === 'string') {
+					if (typeof actions[action] !== 'function') {
+						throw new TypeError(`PolymerRedux: <${this.constructor.is}> invalid action creator "${action}"`);
+					}
+					action = actions[action](...args.slice(1));
+				}
+
+				// Proxy async dispatch
+				if (typeof action === 'function') {
+					const originalAction = action;
+					action = (...args) => {
+						// Replace redux dispatch
+						args.splice(0, 1, (...args) => {
+							return this.dispatch(...args);
+						});
+						return originalAction(...args);
+					};
+
+					// Copy props from the original action to the proxy.
+					// see https://github.com/tur-nr/polymer-redux/issues/98
+					Object.keys(originalAction).forEach(prop => {
+						action[prop] = originalAction[prop];
+					});
+				}
+
+				return store.dispatch(action);
+			}
+
+			/**
+			 * Gets the current state in the Redux store.
+			 *
+			 * @return {*}
+			 */
+			getState() {
+				return store.getState();
+			}
+		};
 	};
 }
