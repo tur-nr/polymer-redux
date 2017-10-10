@@ -23,6 +23,8 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 // Expose globals
 var CustomEvent = window_1.CustomEvent;
 var Polymer = window_1.Polymer;
@@ -31,8 +33,6 @@ var Polymer = window_1.Polymer;
  * Polymer Redux
  *
  * Creates a Class mixin for decorating Elements with a given Redux store.
- *
- * @polymerMixin
  *
  * @param {Object} store Redux store.
  * @return {Function} Class mixin.
@@ -61,12 +61,14 @@ function PolymerRedux(store) {
   * @param {Object} properties
   * @return {Function} Update function.
   */
-	var bind = function bind(element, properties) {
+	var bind = function bind(element, properties, mapStateToProps) {
+		var elementName = element.constructor.is;
+
 		var bindings = Object.keys(properties).filter(function (name) {
 			var property = properties[name];
 			if (Object.prototype.hasOwnProperty.call(property, 'statePath')) {
 				if (!property.readOnly && property.notify) {
-					console_1.warn('PolymerRedux: <' + element.constructor.is + '>.' + name + ' has "notify" enabled, two-way bindings goes against Redux\'s paradigm');
+					console_1.warn('PolymerRedux: <' + elementName + '>.' + name + ' has "notify" enabled, two-way bindings goes against Redux\'s paradigm.');
 				}
 				return true;
 			}
@@ -80,19 +82,20 @@ function PolymerRedux(store) {
    * @param {Object} state
    */
 		var update = function update(state) {
-			var propertiesChanged = false;
-			bindings.forEach(function (name) {
-				// Perhaps .reduce() to a boolean?
+			var mappedState = mapStateToProps ? mapStateToProps(state) : {};
+			var updates = bindings.reduce(function (props, name) {
 				var statePath = properties[name].statePath;
-
 				var value = typeof statePath === 'function' ? statePath.call(element, state) : Polymer.Path.get(state, statePath);
 
-				var changed = element._setPendingPropertyOrPath(name, value, true);
-				propertiesChanged = propertiesChanged || changed;
-			});
-			if (propertiesChanged) {
-				element._invalidateProperties();
-			}
+				// Warn about double bindings
+				if (props[name]) {
+					console_1.warn('PolymerRedux: <' + elementName + '>.' + name + ' has double bindings, statePath binding has priority.');
+				}
+
+				return _extends({}, props, _defineProperty({}, name, value));
+			}, mappedState);
+
+			element.setProperties(updates, true);
 		};
 
 		// Redux listener
@@ -104,8 +107,9 @@ function PolymerRedux(store) {
 		});
 
 		subscribers.set(element, unsubscribe);
+		update(store.getState());
 
-		return update(store.getState());
+		return update;
 	};
 
 	/**
@@ -139,40 +143,100 @@ function PolymerRedux(store) {
 	};
 
 	/**
+  * Adds events listeners to a element.
+  *
+  * @param {HTMLElement} element
+  * @param {Object} listeners List of event listeners to add.
+  */
+	function addListeners(element, listeners) {
+		Object.keys(listeners).forEach(function (name) {
+			element.addEventListener(name, listeners[name]);
+		});
+	}
+
+	/**
+  * Removes events listeners from an element.
+  *
+  * @param {HTMLElement} element
+  * @param {Object} listeners List of event listeners to remove.
+  */
+	function removeListeners(element, listeners) {
+		Object.keys(listeners).forEach(function (name) {
+			element.removeEventListeners(name, listeners[name]);
+		});
+	}
+
+	/**
   * ReduxMixin
   *
   * @example
   *     const ReduxMixin = PolymerRedux(store)
   *     class Foo extends ReduxMixin(Polymer.Element) { }
   *
-  * @polymerMixinClass
+  * @polymer
+  * @mixinFunction
   *
   * @param {Polymer.Element} parent The polymer parent element.
   * @return {Function} PolymerRedux mixed class.
   */
-	return function (parent) {
+	return function (parent, mapStateToProps, mapEventsToDispatch) {
+		if (mapStateToProps && typeof mapStateToProps !== 'function') {
+			throw new TypeError('PolymerRedux: expects mapStateToProps to be a function');
+		}
+
+		if (mapEventsToDispatch && typeof mapEventsToDispatch !== 'function') {
+			throw new TypeError('PolymerRedux: expects mapEventsToDispatch to be a function');
+		}
+
+		/**
+   * @polymer
+   * @mixinClass
+   */
 		return class ReduxMixin extends parent {
 			constructor() {
-				super();
+				var _this;
+
+				_this = super();
 
 				// Collect the action creators first as property changes trigger
 				// dispatches from observers, see #65, #66, #67
-				var actions = collect(this.constructor, 'actions');
-				Object.defineProperty(this, '_reduxActions', {
-					configurable: true,
-					value: actions
+				var reduxActions = collect(this.constructor, 'actions');
+
+				// If we have any mapped events to dispatch, build the liseners object
+				var mappedEvents = mapEventsToDispatch ? mapEventsToDispatch(function () {
+					return _this.dispatch.apply(_this, arguments);
+				}) : {};
+
+				// Bind the listeners to call with the event and the current state
+				var reduxMappedListeners = Object.keys(mappedEvents).reduce(function (listeners, name) {
+					return _extends({}, listeners, _defineProperty({}, name, function (event) {
+						event.stopImmediatePropagation();
+						mappedEvents[name](event, store.getState());
+					}));
+				}, {});
+
+				// Define properties
+				Object.defineProperties(this, {
+					_reduxActions: {
+						value: reduxActions
+					},
+					_reduxMappedListeners: {
+						value: reduxMappedListeners
+					}
 				});
 			}
 
 			connectedCallback() {
 				super.connectedCallback();
 				var properties = collect(this.constructor, 'properties');
-				bind(this, properties);
+				bind(this, properties, mapStateToProps);
+				addListeners(this, this._reduxMappedListeners);
 			}
 
 			disconnectedCallback() {
 				super.disconnectedCallback();
 				unbind(this);
+				removeListeners(this, this._reduxMappedListeners);
 			}
 
 			/**
@@ -193,7 +257,7 @@ function PolymerRedux(store) {
     * @return {Object} The action.
     */
 			dispatch() {
-				var _this = this;
+				var _this2 = this;
 
 				for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 					args[_key] = arguments[_key];
@@ -221,7 +285,7 @@ function PolymerRedux(store) {
 
 						// Replace redux dispatch
 						args.splice(0, 1, function () {
-							return _this.dispatch.apply(_this, arguments);
+							return _this2.dispatch.apply(_this2, arguments);
 						});
 						return originalAction.apply(undefined, args);
 					};
