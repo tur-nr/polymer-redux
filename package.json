@@ -29,7 +29,10 @@
   },
   "homepage": "https://github.com/tur-nr/polymer-redux#readme",
   "dependencies": {
-    "global": "^4.3.1"
+    "@polymer/iron-demo-helpers": "^3.0.0-pre.1",
+    "@polymer/polymer": "^3.0.0-pre.1",
+    "global": "^4.3.1",
+    "web-component-tester": "^6.4.1"
   },
   "devDependencies": {
     "babel-jest": "^19.0.0",

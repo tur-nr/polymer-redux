@@ -1,8 +1,8 @@
 import window from 'global/window';
 import console from 'global/console';
-
+import {get} from '../node_modules/@polymer/polymer/lib/utils/path'
 // Expose globals
-const {CustomEvent, Polymer} = window;
+const {CustomEvent} = window;
 
 /**
  * Polymer Redux
@@ -60,7 +60,7 @@ export default function PolymerRedux(store) {
 				const {statePath} = properties[name];
 				const value = (typeof statePath === 'function') ?
 					statePath.call(element, state) :
-					Polymer.Path.get(state, statePath);
+					get(state, statePath);
 
 				const changed = element._setPendingPropertyOrPath(name, value, true);
 				propertiesChanged = propertiesChanged || changed;
@@ -189,6 +189,11 @@ export default function PolymerRedux(store) {
 					});
 					return originalAction(...args);
 				};
+				// Copy props from the original action to the proxy.
+				// see https://github.com/tur-nr/polymer-redux/issues/98
+				Object.keys(originalAction).forEach(prop => {
+					action[prop] = originalAction[prop];
+				});
 
 				// Copy props from the original action to the proxy.
 				// see https://github.com/tur-nr/polymer-redux/issues/98
