@@ -213,6 +213,45 @@
 			</script>
 		</dom-module>
 
+		<dom-module id="fixture-five">
+			<script>
+				class FixtureFive extends ReduxMixin(Polymer.Element) {
+					static get is() { return 'fixture-five'; }
+					static get properties() {
+						return {
+							foo: {
+								statePath: 'foo',
+								observer: '_fooChanged'
+							},
+							bar: {
+								statePath(state) {
+									return state.bar;
+								}
+							}
+						}
+					}
+					static get actions() {
+						return {
+							foo() {
+								return {
+									type: "FOO"
+								}
+							},
+							bar() {
+								return {
+									type: "BAR"
+								}
+							}
+						}
+					}
+					_fooChanged() {
+						this.dispatch("bar");
+					}
+				}
+				window.customElements.define(FixtureFive.is, FixtureFive);
+			</script>
+		</dom-module>
+
     <test-fixture id="one">
       <template>
         <fixture-one></fixture-one>
@@ -234,6 +273,12 @@
     <test-fixture id="issue-77">
       <template>
         <fixture-four></fixture-four>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="issue-105">
+      <template>
+        <fixture-five></fixture-five>
       </template>
     </test-fixture>
 
@@ -369,6 +414,14 @@
 					element.dispatch('foo');
 
 					assert.equal(store.getState().foo, element.foo);
+				})
+			});
+
+			describe('issue #105', function() {
+				it('should call dynamic selectors in order', function() {
+					const element = fixture('issue-105');
+					element.dispatch('foo');
+					assert.equal(store.getState().bar, element.bar);
 				})
 			});
     </script>

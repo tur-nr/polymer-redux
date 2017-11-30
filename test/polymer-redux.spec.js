@@ -24,7 +24,8 @@ const store = {
 const constructor = jest.fn();
 const connectedCallback = jest.fn();
 const disconnectedCallback = jest.fn();
-const setProperty = jest.fn();
+const setPendingPropertyOrPath = jest.fn();
+const invalidateProperties = jest.fn();
 const dispatchEvent = jest.fn();
 
 class Parent {
@@ -33,15 +34,19 @@ class Parent {
 	}
 
 	connectedCallback() {
-		connectedCallback();
+		return connectedCallback();
 	}
 
 	disconnectedCallback() {
-		disconnectedCallback();
+		return disconnectedCallback();
 	}
 
-	_setProperty(...args) {
-		setProperty(...args);
+	_setPendingPropertyOrPath(...args) {
+		return setPendingPropertyOrPath(...args);
+	}
+
+	_invalidateProperties() {
+		return invalidateProperties();
 	}
 
 	dispatchEvent(...args) {
@@ -124,16 +129,25 @@ describe('#PolymerRedux', () => {
 			describe('bindings', () => {
 				it('should have initial properties set with statePath', () => {
 					window.Polymer.Path.get.mockReturnValueOnce('foo');
+					setPendingPropertyOrPath.mockReturnValueOnce(true);
+
 					const e = new (ReduxMixin(ParentWithProps))();
 					e.connectedCallback();
-					expect(e.foo).toBe('foo');
+
+					expect.assertions(2);
+
+					expect(setPendingPropertyOrPath).toHaveBeenCalledWith('foo', 'foo', true)
+					expect(invalidateProperties).toBeCalled();
 				});
 
-				it('should set readOnly property via _setProperty()', () => {
+				it('should set readOnly property', () => {
 					statePath.mockReturnValueOnce('bar');
+					setPendingPropertyOrPath.mockReturnValueOnce(true);
+
 					const e = new (ReduxMixin(ParentWithProps))();
 					e.connectedCallback();
-					expect(setProperty).toHaveBeenCalledWith('bar', 'bar');
+
+					expect(setPendingPropertyOrPath).toHaveBeenCalledWith('bar', 'bar', true);
 				});
 
 				it('should warn against two-way bindings notify option', () => {
