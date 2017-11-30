@@ -1,6 +1,5 @@
-import window from 'global/window';
-import console from 'global/console';
-import {get} from '../node_modules/@polymer/polymer/lib/utils/path'
+import {window, console} from '../helpers/global/index.js';
+import {get} from '../node_modules/@polymer/polymer/lib/utils/path.js'
 // Expose globals
 const {CustomEvent} = window;
 
