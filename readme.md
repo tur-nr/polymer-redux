@@ -15,32 +15,55 @@ with Polymer to be more focused on functionality than the applications state.
 ## Installation
 
 ```bash
-bower install --save polymer-redux
+yarn add --flat polymer-redux
 ```
 
 ## Example
 
 ```javascript
+// ./my-element.js
+import { Element as PolymerElement } from '../@polymer/polymer/polymer-element.js';
+import PolymerRedux from '../polymer-redux/polymer-redux.js';
+
 // Create a Redux store
-const store = Redux.createStore((state = {}, action) => state)
+const store = Redux.createStore((state, action) => {
+    return {
+        message: 'Hello, Redux!'
+    };
+});
 
 // Create the PolymerRedux mixin
 const ReduxMixin = PolymerRedux(store)
 
 // Bind Elements using the mixin
 class MyElement extends ReduxMixin(Polymer.Element) {
-    static get is() {
-        return 'my-element'
+    static get template() {
+        return `
+            <h1>[[message]]</h1>
+        `;
     }
 
-    connectedCallback() {
-        super.connectedCallback();
-        const state = this.getState();
+    static get properties() {
+        return {
+            message: {
+                type: String,
+                statePath: 'message'
+            }
+        };
     }
 }
 
 // Define your Element
-customElements.define(MyElement.is, MyElement)
+customElements.define('my-element', MyElement)
+```
+
+```html
+<!-- Imports -->
+<script src="../redux/dist/redux.js"></script>
+<script type="module" src="./my-element.js"></script>
+
+<!-- Usage -->
+<my-element></my-element>
 ```
 
 Now `MyElement` has a connection to the Redux store and can bind properties to
