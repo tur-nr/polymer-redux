@@ -1,8 +1,4 @@
-import window from 'global/window';
-import console from 'global/console';
-
-// Expose globals
-const {CustomEvent, Polymer} = window;
+import {get} from '../@polymer/polymer/lib/utils/path.js';
 
 /**
  * Polymer Redux
@@ -60,7 +56,7 @@ export default function PolymerRedux(store) {
 				const {statePath} = properties[name];
 				const value = (typeof statePath === 'function') ?
 					statePath.call(element, state) :
-					Polymer.Path.get(state, statePath);
+					get(state, statePath);
 
 				const changed = element._setPendingPropertyOrPath(name, value, true);
 				propertiesChanged = propertiesChanged || changed;
