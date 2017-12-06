@@ -2,7 +2,9 @@
 <script src="../node_modules/redux/dist/redux.js"></script>
 <script>
 	const initial = {
-		message: 'Hello from PolymerRedux'
+		message: 'Hello from PolymerRedux',
+		foo: 'I am a Foo',
+		bar: 'I just got Bar\'d'
 	};
 	const reducer = (state = initial, action) => {
 		switch (action.type) {
