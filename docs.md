@@ -17,7 +17,7 @@ Polymer is a modern library for creating [Web Components](https://github.com/w3c
 
 ## [Caveats](#caveats) {#caveats}
 
-Before choosing Redux as your state management solution for your Polymer application, it is good to know the limiations it brings.
+Before choosing Redux as your state management solution for your Polymer application, it is good to know the limitations it brings.
 
 
 ### [Observing Arrays/Objects](#observing-arrays-objects) {#observing-arrays-objects}
