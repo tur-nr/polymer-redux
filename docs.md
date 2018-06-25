@@ -31,7 +31,7 @@ const reducer = (state, action) => {
       return {
         ...state,
         array: [
-          ...array,
+          ...state.array,
           action.value
         ]
       }
