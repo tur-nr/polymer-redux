@@ -154,11 +154,15 @@ function PolymerRedux(store) {
 	return function (parent) {
 		return class ReduxMixin extends parent {
 			constructor() {
-				super();
+				var _this;
+
+				_this = super();
 
 				// Collect the action creators first as property changes trigger
 				// dispatches from observers, see #65, #66, #67
-				var actions = collect(this.constructor, 'actions');
+				var actions = collect(this.constructor, 'actions').map(function (action) {
+					return action.bind(_this);
+				});
 				Object.defineProperty(this, '_reduxActions', {
 					configurable: true,
 					value: actions
@@ -194,7 +198,7 @@ function PolymerRedux(store) {
     * @return {Object} The action.
     */
 			dispatch() {
-				var _this = this;
+				var _this2 = this;
 
 				for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 					args[_key] = arguments[_key];
@@ -222,7 +226,7 @@ function PolymerRedux(store) {
 
 						// Replace redux dispatch
 						args.splice(0, 1, function () {
-							return _this.dispatch.apply(_this, arguments);
+							return _this2.dispatch.apply(_this2, arguments);
 						});
 						return originalAction.apply(undefined, args);
 					};

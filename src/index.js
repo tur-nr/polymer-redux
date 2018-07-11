@@ -132,7 +132,7 @@ export default function PolymerRedux(store) {
 
 			// Collect the action creators first as property changes trigger
 			// dispatches from observers, see #65, #66, #67
-			const actions = collect(this.constructor, 'actions');
+			const actions = collect(this.constructor, 'actions').map(action => action.bind(this));
 			Object.defineProperty(this, '_reduxActions', {
 				configurable: true,
 				value: actions
