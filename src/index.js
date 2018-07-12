@@ -176,7 +176,7 @@ export default function PolymerRedux(store) {
 				if (typeof actions[action] !== 'function') {
 					throw new TypeError(`PolymerRedux: <${this.constructor.is}> invalid action creator "${action}"`);
 				}
-				action = actions[action](...args.slice(1));
+				action = actions[action].apply(this, args.slice(1));
 			}
 
 			// Proxy async dispatch
@@ -187,7 +187,7 @@ export default function PolymerRedux(store) {
 					args.splice(0, 1, (...args) => {
 						return this.dispatch(...args);
 					});
-					return originalAction(...args);
+					return originalAction.apply(this, args);
 				};
 
 				// Copy props from the original action to the proxy.
