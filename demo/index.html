@@ -1,32 +1,33 @@
 <!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-		<title>polymer-redux Demo</title>
+    <title>polymer-redux demo</title>
 
-		<script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
-		<link rel="import" href="./message-mixin.html">
-	</head>
-	<body>
-		<dom-module id="my-element">
-			<template>
-				<p>[[message]]</p>
-				<button on-click="handleUpdateMessage">Update message</button>
-			</template>
-			<script>
-				class MyElement extends MessageMixin(Polymer.Element) {
-					static get is() { return 'my-element'; }
+    <script type="module">
+      import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+      import '@polymer/iron-demo-helpers/demo-snippet';
+    </script>
 
-					handleUpdateMessage() {
-						this.dispatch('updateMessage', 'Nothing changes by staying the same, quite literally.');
-					}
-				}
-				window.customElements.define(MyElement.is, MyElement);
-			</script>
-		</dom-module>
-		<my-element></my-element>
-	</body>
+    <script type="module" src="../polymer-redux.js"></script>
+
+    <custom-style>
+      <style is="custom-style" include="demo-pages-shared-styles">
+      </style>
+    </custom-style>
+  </head>
+  <body>
+    <div class="vertical-section-container centered">
+      <h3>Basic polymer-redux demo</h3>
+      <demo-snippet>
+        <template>
+          <polymer-redux></polymer-redux>
+        </template>
+      </demo-snippet>
+    </div>
+  </body>
 </html>

@@ -1,10 +1,6 @@
-bower_components
-coverage
-test
-.babelrc
+coverage/
+test/
 .editorconfig
 .gitignore
 .npmignore
 .travis.yml
-gulpfile.babel.js
-wct.conf.json

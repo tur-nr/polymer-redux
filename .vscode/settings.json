@@ -1,0 +1,6 @@
+{
+  "editor.formatOnSave": true,
+  "[html]": {
+    "editor.formatOnSave": false
+  }
+}
