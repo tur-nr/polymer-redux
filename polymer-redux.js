@@ -1,13 +1,29 @@
 import './process-env';
-import { html, PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { createStore } from 'redux';
 
-const subscribers = new Map();
+/**
+ * Element bindings registry.
+ *
+ * @type {Map<HTMLElement, Function>}
+ */
+const registry = new Map();
 
+/**
+ * Is given argument a function.
+ *
+ * @param {any} fn
+ * @return {Boolean}
+ */
 function isFunction(fn) {
 	return typeof fn === 'function';
 }
 
+/**
+ * Assert given value is a Redux store by ducktyping.
+ *
+ * @param {Object} store Redux store object.
+ * @throws {TypeError} If given argument isn't an implmentation of Redux
+ * 									 store.
+ */
 function assertReduxStore(store) {
 	if (!store) {
 		throw new TypeError('PolymerRedux: expecting a redux store.');
@@ -20,6 +36,12 @@ function assertReduxStore(store) {
 	}
 }
 
+/**
+ * Binds an element to a given redux store.
+ *
+ * @param {Object} store Redux store.
+ * @param {HTMLElement} element
+ */
 function bindToReduxStore(store, element) {
 	const Definition = element.constructor;
 
@@ -38,30 +60,41 @@ function bindToReduxStore(store, element) {
 		element.addEventListener(name, listeners[name]);
 	});
 
-	subscribers.set(element, () => {
+	registry.set(element, () => {
 		unsubscribe();
 		events.forEach(function(name) {
 			element.removeEventListener(name, listeners[name]);
 		});
 	});
 
-	updateProperties();
+	updateProperties(store.getState());
 
-	function updateProperties(state = store.getState()) {
+	function updateProperties(state) {
 		if (isFunction(Definition.mapStateToProps)) {
-			const properties = Definition.mapStateToProps(state);
+			const properties = Definition.mapStateToProps(state, element);
 			element.setProperties(properties, true);
 		}
 	}
 }
 
+/**
+ * Releases element from any Redux bindings.
+ *
+ * @param {HTMLElement} element
+ */
 function releaseFromReduxStore(element) {
-	const unsubscribe = subscribers.get(element);
+	const unsubscribe = registry.get(element);
 	if (unsubscribe) {
 		unsubscribe();
 	}
 }
 
+/**
+ * Creates a mixin for a given Redux store.
+ *
+ * @param {Object} store Redux store instance.
+ * @return {Class}
+ */
 export function createReduxMixin(store) {
 	assertReduxStore(store);
 
@@ -83,62 +116,27 @@ export function createReduxMixin(store) {
 		};
 }
 
-const store = createStore((state = { name: 'Chris' }, action) => {
-	switch (action.type) {
-		case 'UPDATE_NAME':
-			return Object.assign({}, state, {
-				name: action.name
-			});
-		default:
-			return state;
-	}
-});
+export default createReduxMixin;
 
-const ReduxMixin = createReduxMixin(store);
-
-class PolymerRedux extends ReduxMixin(PolymerElement) {
-	static mapStateToProps(state) {
-		return {
-			name: state.name
-		};
-	}
-
-	static mapDispatchToEvents(dispatch) {
-		return {
-			updateName(event) {
-				dispatch({
-					type: 'UPDATE_NAME',
-					name: event.detail
-				});
-			}
-		};
-	}
-
-	static get template() {
-		return html`
-      <style>
-        :host {
-          display: block;
-        }
-      </style>
-			<h2>Hello [[name]]!</h2>
-			<button on-click="_updateName">Update Name</button>
-    `;
-	}
-
-	static get properties() {
-		return {
-			name: String
-		};
-	}
-
-	_updateName() {
-		this.dispatchEvent(
-			new CustomEvent('updateName', {
-				detail: 'Chutima'
-			})
+/**
+ * Binds a list of action creators to a dispatch function.
+ *
+ * @param {Object} actionCreators
+ * @param {Function} dispatch
+ * @return {Object}
+ */
+export function bindActionCreators(actionCreators, dispatch) {
+	if (!actionCreators) {
+		throw new TypeError(
+			'PolymerRedux: Expecting "actionCreators" to be an enumerable.'
 		);
 	}
-}
 
-window.customElements.define('polymer-redux', PolymerRedux);
+	return Object.keys(actionCreators).reduce((actions, name) => {
+		return Object.assign(actions, {
+			[name]: function() {
+				return dispatch(actionCreators[name].apply(this, arguments));
+			}
+		});
+	}, {});
+}

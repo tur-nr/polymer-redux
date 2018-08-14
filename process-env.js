@@ -1,3 +1,4 @@
+// Ensure `process.env` is available on the window
 if (typeof window.process === 'undefined') {
 	window.process = {
 		env: {}

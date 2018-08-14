@@ -27,7 +27,7 @@
     "url": "https://github.com/tur-nr/polymer-redux/issues"
   },
   "homepage": "https://github.com/tur-nr/polymer-redux#readme",
-  "dependencies": {
+  "peerDependencies": {
     "@polymer/polymer": "^3.0.0"
   },
   "devDependencies": {
