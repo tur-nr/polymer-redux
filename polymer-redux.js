@@ -20,9 +20,8 @@ function isFunction(fn) {
 /**
  * Assert given value is a Redux store by ducktyping.
  *
+ * @throws {TypeError} If given argument isn't an implmentation of Redux store.
  * @param {Object} store Redux store object.
- * @throws {TypeError} If given argument isn't an implmentation of Redux
- * 									 store.
  */
 function assertReduxStore(store) {
 	if (!store) {
@@ -45,36 +44,41 @@ function assertReduxStore(store) {
 function bindToReduxStore(store, element) {
 	const Definition = element.constructor;
 
-	const unsubscribe = store.subscribe(function() {
-		const state = store.getState();
-		updateProperties(state);
-		element.dispatchEvent(new CustomEvent('state-changed', { detail: state }));
-	});
-
-	const listeners = isFunction(Definition.mapDispatchToEvents)
-		? Definition.mapDispatchToEvents(store.dispatch)
-		: null;
-	const events = listeners != null ? Object.keys(listeners) : [];
-
-	events.forEach(function(name) {
-		element.addEventListener(name, listeners[name]);
-	});
-
-	registry.set(element, () => {
-		unsubscribe();
-		events.forEach(function(name) {
-			element.removeEventListener(name, listeners[name]);
-		});
-	});
-
-	updateProperties(store.getState());
-
-	function updateProperties(state) {
+	const updateProperties = state => {
 		if (isFunction(Definition.mapStateToProps)) {
 			const properties = Definition.mapStateToProps(state, element);
 			element.setProperties(properties, true);
 		}
-	}
+	};
+
+	const unsubscribe = store.subscribe(() => {
+		const state = store.getState();
+		updateProperties(state);
+
+		element.dispatchEvent(
+			new CustomEvent('state-changed', {
+				detail: state,
+				bubbles: true,
+				composed: true
+			})
+		);
+	});
+
+	const listeners = isFunction(Definition.mapDispatchToEvents)
+		? Definition.mapDispatchToEvents(store.dispatch, element)
+		: null;
+	const events = listeners != null ? Object.keys(listeners) : [];
+
+	events.forEach(name => element.addEventListener(name, listeners[name]));
+
+	registry.set(element, () => {
+		unsubscribe();
+		events.forEach(name =>
+			element.removeEventListener(name, listeners[name])
+		);
+	});
+
+	updateProperties(store.getState());
 }
 
 /**
@@ -112,6 +116,10 @@ export function createReduxMixin(store) {
 
 			getState() {
 				return store.getState();
+			}
+
+			dispatchAction() {
+				return store.dispatch.apply(store, arguments);
 			}
 		};
 }

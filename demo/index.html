@@ -11,67 +11,7 @@
     <script type="module">
       import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
       import '@polymer/iron-demo-helpers/demo-snippet';
-    </script>
-
-    <script type="module">
-      import { html, PolymerElement } from '@polymer/polymer/polymer-element';
-      import { createReduxMixin, bindActionCreators } from '../polymer-redux';
-      import { createStore } from 'redux';
-
-      class HelloDemo extends PolymerElement {
-        static get template() {
-          return html`
-            <h1>Hello, {{name}}!</h1>
-            <input value="{{inputValue::input}}" placeholder="Enter a name" /> <button on-click="handleUpdate">Update</button>
-          `;
-        }
-
-        static get properties() {
-          return {
-            inputValue: String
-          };
-        }
-
-        handleUpdate() {
-          this.dispatchEvent(
-            new CustomEvent('updateName', {
-              detail: this.inputValue,
-            })
-          );
-        }
-      }
-
-      const store = createStore((state = {name: 'Polymer'}, action) => {
-        switch (action.type) {
-          case 'UPDATE': return Object.assign({}, {
-            name: action.name
-          });
-
-          default: return state;
-        }
-      });
-      const ReduxMixin = createReduxMixin(store);
-
-      class ConnectedHello extends ReduxMixin(HelloDemo) {
-        static mapStateToProps(state) {
-          return {
-            name: state.name,
-          }
-        }
-
-        static mapDispatchToEvents(dispatch) {
-          return bindActionCreators({
-            updateName(event) {
-              return {
-                type: 'UPDATE',
-                name: event.detail
-              };
-            }
-          }, dispatch);
-        }
-      }
-
-      customElements.define('hello-demo', ConnectedHello);
+      import './connected/redux-todo';
     </script>
 
     <custom-style>
@@ -84,7 +24,7 @@
       <h3>Basic polymer-redux demo</h3>
       <demo-snippet>
         <template>
-          <hello-demo></hello-demo>
+          <redux-todo></redux-todo>
         </template>
       </demo-snippet>
     </div>
