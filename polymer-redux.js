@@ -1,13 +1,6 @@
 import './process-env';
 
 /**
- * Element bindings registry.
- *
- * @type {Map<HTMLElement, Function>}
- */
-const registry = new Map();
-
-/**
  * Is given argument a function.
  *
  * @param {any} fn
@@ -39,9 +32,10 @@ function assertReduxStore(store) {
  * Binds an element to a given redux store.
  *
  * @param {Object} store Redux store.
- * @param {HTMLElement} element
+ * @param {HTMLElement} element Element instance.
+ * @param {Map<HTMLElement, Function>} registry Redux bindings registry.
  */
-function bindToReduxStore(store, element) {
+function bindToReduxStore(store, element, registry) {
 	const Definition = element.constructor;
 
 	const updateProperties = state => {
@@ -57,9 +51,7 @@ function bindToReduxStore(store, element) {
 
 		element.dispatchEvent(
 			new CustomEvent('state-changed', {
-				detail: state,
-				bubbles: true,
-				composed: true
+				detail: state
 			})
 		);
 	});
@@ -84,10 +76,12 @@ function bindToReduxStore(store, element) {
 /**
  * Releases element from any Redux bindings.
  *
- * @param {HTMLElement} element
+ * @param {HTMLElement} element Element instance.
+ * @param {Map<HTMLElement, Function>} registry Redux bindings registry.
  */
-function releaseFromReduxStore(element) {
+function releaseFromReduxStore(element, registry) {
 	const unsubscribe = registry.get(element);
+
 	if (unsubscribe) {
 		unsubscribe();
 	}
@@ -102,15 +96,17 @@ function releaseFromReduxStore(element) {
 export function createReduxMixin(store) {
 	assertReduxStore(store);
 
+	const registry = new Map();
+
 	return Parent =>
 		class ReduxMixin extends Parent {
 			connectedCallback() {
-				bindToReduxStore(store, this);
+				bindToReduxStore(store, this, registry);
 				super.connectedCallback();
 			}
 
 			disconnectedCallback() {
-				releaseFromReduxStore(this);
+				releaseFromReduxStore(this, registry);
 				super.disconnectedCallback();
 			}
 
