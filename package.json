@@ -1,15 +1,8 @@
 {
   "name": "polymer-redux",
-  "version": "1.0.5",
+  "version": "2.0.0-beta.1",
   "description": "Polymer bindings for Redux.",
-  "main": "lib/polymer-redux.js",
-  "module": "src/index.js",
-  "jsnext:main": "src/index.js",
-  "scripts": {
-    "build": "gulp",
-    "pretest": "npm run build && npm run lint",
-    "test": "jest && polymer test"
-  },
+  "main": "polymer-redux.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tur-nr/polymer-redux.git"
@@ -31,21 +24,10 @@
     "@polymer/polymer": "^3.0.0"
   },
   "devDependencies": {
-    "@polymer/iron-demo-helpers": "^3.0.0-pre.19",
+    "@polymer/iron-demo-helpers": "^3.0.2",
     "@webcomponents/webcomponentsjs": "^2.0.0",
     "polymer-cli": "^1.8.0",
     "redux": "^4.0.0",
     "wct-browser-legacy": "^1.0.0"
-  },
-  "jest": {
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "src/**.js"
-    ],
-    "resetMocks": true,
-    "testMatch": [
-      "**/test/?(*.)spec.js"
-    ],
-    "verbose": true
   }
 }

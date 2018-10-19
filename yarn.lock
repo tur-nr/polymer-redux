@@ -502,41 +502,41 @@
   resolved "https://registry.yarnpkg.com/@polymer/esm-amd-loader/-/esm-amd-loader-1.0.3.tgz#231c47229da323f5a9ba89cf0696040021e66982"
   integrity sha512-j7fDIkNeR8cekqK2WRH5YV1VtIdPwqrgb5OzAN5QUIWEBkFj5OsxTvrkJiSaFgEMdKZoozs/vz+oq83Qehp4wA==
 
-"@polymer/font-roboto@^3.0.0-pre.21":
-  version "3.0.0-pre.21"
-  resolved "https://registry.yarnpkg.com/@polymer/font-roboto/-/font-roboto-3.0.0-pre.21.tgz#65674464138a51f57cfdfd043e394d8fe75990b3"
-  integrity sha512-1DnYDaoyTeSmZzocj7jhHS8tM1j+FJNTrMEOyudLKF8sqGzmlz48XyMRbt4RL4pO9szz5vJ8xhS+4WUPHFj9OA==
+"@polymer/font-roboto@^3.0.0-pre.25":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@polymer/font-roboto/-/font-roboto-3.0.2.tgz#80cdaa7225db2359130dfb2c6d9a3be1820020c3"
+  integrity sha512-tx5TauYSmzsIvmSqepUPDYbs4/Ejz2XbZ1IkD7JEGqkdNUJlh+9KU85G56Tfdk/xjEZ8zorFfN09OSwiMrIQWA==
 
-"@polymer/iron-demo-helpers@^3.0.0-pre.19":
-  version "3.0.0-pre.21"
-  resolved "https://registry.yarnpkg.com/@polymer/iron-demo-helpers/-/iron-demo-helpers-3.0.0-pre.21.tgz#5b683b89d66cf79cc66f2f05916851c5f8f8c9af"
-  integrity sha512-hkc6vNAMBbScLuntRpff1IkeMKIPa1SKNRhhBxaO/T16u+KTuMs7e/i9XJodXPBUQEyzlaZa7qc5GXU3oeTrxw==
+"@polymer/iron-demo-helpers@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@polymer/iron-demo-helpers/-/iron-demo-helpers-3.0.2.tgz#ba2503555b6166e75016e072f357cee15b44b03c"
+  integrity sha512-VqGEIOEXPgx9G6uLfvnzXVib6sE6lJENV3gywoBTstrMCrFCSGpmTMVAovpHyoDw8Ceu6LeoVuMsxaT1mCEirg==
   dependencies:
-    "@polymer/font-roboto" "^3.0.0-pre.21"
-    "@polymer/iron-flex-layout" "^3.0.0-pre.21"
-    "@polymer/iron-location" "^3.0.0-pre.21"
-    "@polymer/marked-element" "^3.0.0-pre.21"
+    "@polymer/font-roboto" "^3.0.0-pre.25"
+    "@polymer/iron-flex-layout" "^3.0.0-pre.25"
+    "@polymer/iron-location" "^3.0.0-pre.25"
+    "@polymer/marked-element" "^3.0.0-pre.25"
     "@polymer/polymer" "^3.0.0"
-    "@polymer/prism-element" "^3.0.0-pre.21"
+    "@polymer/prism-element" "^3.0.0-pre.25"
 
-"@polymer/iron-flex-layout@^3.0.0-pre.21":
-  version "3.0.0-pre.21"
-  resolved "https://registry.yarnpkg.com/@polymer/iron-flex-layout/-/iron-flex-layout-3.0.0-pre.21.tgz#064bccb85ec2091b66366970e8867d3de7bb273d"
-  integrity sha512-/GFBWLBhpzycXmdyS+rzQxCa/ssCX5ZGEa0M/oMRsUK/hUKrj/XBNNYZ3BlyHf2NHELNqnwZLcIZB5EPjA0uwg==
-  dependencies:
-    "@polymer/polymer" "^3.0.0"
-
-"@polymer/iron-location@^3.0.0-pre.21":
-  version "3.0.0-pre.21"
-  resolved "https://registry.yarnpkg.com/@polymer/iron-location/-/iron-location-3.0.0-pre.21.tgz#0f4cd58a79e12767f2c993bbc0cdbd0487e78040"
-  integrity sha512-NIAAGKkvUkfkVg3lge4r66WdcTXTZfhNwADWwh5REcM5rubqMWb6PKb+K/6bumDEODYtI5waL3ewOeFMdONUHA==
+"@polymer/iron-flex-layout@^3.0.0-pre.25":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@polymer/iron-flex-layout/-/iron-flex-layout-3.0.1.tgz#36f9e1a8eb792d279b2bc75d362628721ad37f0c"
+  integrity sha512-7gB869czArF+HZcPTVSgvA7tXYFze9EKckvM95NB7SqYF+NnsQyhoXgKnpFwGyo95lUjUW9TFDLUwDXnCYFtkw==
   dependencies:
     "@polymer/polymer" "^3.0.0"
 
-"@polymer/marked-element@^3.0.0-pre.21":
-  version "3.0.0-pre.21"
-  resolved "https://registry.yarnpkg.com/@polymer/marked-element/-/marked-element-3.0.0-pre.21.tgz#ce9d0c86e93c35226084ee736976bfd1005db9b0"
-  integrity sha512-7DlbJb/l/M87heHvj8lmK6P02fUpoMZLIe6GxbqQscH0uvDtHTyM7topu1hBt0pg0V7wkgC5KInZteftMQSPeQ==
+"@polymer/iron-location@^3.0.0-pre.25":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@polymer/iron-location/-/iron-location-3.0.1.tgz#43a59fced248ea71db5833116fcdefa186b79527"
+  integrity sha512-almb+p/fdSi4bxG+vyXjY51fDZxHMxwiug51Lfvr86wZRXN/u21Y6BapxG5n9f0hPSy9fimjIAvaYmozi7VjyQ==
+  dependencies:
+    "@polymer/polymer" "^3.0.0"
+
+"@polymer/marked-element@^3.0.0-pre.25":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@polymer/marked-element/-/marked-element-3.0.1.tgz#56add62080404dea142c055977807ae9ca773a89"
+  integrity sha512-WJQzQetxdStVGQbyTBUBgd+hSI0Rl39uJg7b2zL3r6EfMnibzmA/YNT06M8jVZdxPF+B4SumrFWRtasVtGQRUQ==
   dependencies:
     "@polymer/polymer" "^3.0.0"
     marked "~0.3.9"
@@ -548,10 +548,10 @@
   dependencies:
     "@webcomponents/shadycss" "^1.2.0"
 
-"@polymer/prism-element@^3.0.0-pre.21":
-  version "3.0.0-pre.21"
-  resolved "https://registry.yarnpkg.com/@polymer/prism-element/-/prism-element-3.0.0-pre.21.tgz#221d742979a61b9167ccb88efe7e257803053623"
-  integrity sha512-8ZvgyrVncOOy9EoGIBAdgBTaPVfu4Vg0fHsBOQ9qCpGXYOU+033G9hgrHgNyWKNR1VGmdVEhztTvNIGqH9KzQA==
+"@polymer/prism-element@^3.0.0-pre.25":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@polymer/prism-element/-/prism-element-3.0.1.tgz#b35d53eec9ecea5e5fec7c82c7e978e760e53501"
+  integrity sha512-mam3oZZwVoxmC8i2srCxaTsvCqZF2HX4yxbm1JN9OGZS2JMwu7bnjjk7O8haoj9u6w+ocUi+vTLjYeIIoPx7vQ==
   dependencies:
     "@polymer/polymer" "^3.0.0"
     prismjs "^1.11.0"
