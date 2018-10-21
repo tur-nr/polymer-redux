@@ -87,7 +87,7 @@ export default class TodoInput extends PolymerElement {
 
 	handleDone(event) {
 		this.dispatchEvent(
-			new CustomEvent('updateTaskDone', {
+			new CustomEvent('update-task-done', {
 				detail: {
 					index: this.index,
 					done: event.target.checked
@@ -100,7 +100,7 @@ export default class TodoInput extends PolymerElement {
 
 	handleDelete() {
 		this.dispatchEvent(
-			new CustomEvent('removeTask', {
+			new CustomEvent('remove-task', {
 				detail: this.index,
 				bubbles: true,
 				composed: true

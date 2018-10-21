@@ -101,7 +101,7 @@ const ReduxMixinTwo = createMixin(storeTwo);
 const ReduxMixinX = createMixin(storeX);
 ```
 
-### Binding Properties to State
+### Binding State to Properties
 
 Elements that extend the Redux mixin can now implement `static mapStateToProps(state, element)`. This method provides the logic for syncing the store's state to properties.
 
@@ -128,7 +128,7 @@ It's considered good practice to define properties that will be mapped to Redux 
 
 #### Dynamic Mapping
 
-`mapStateToProps` accepts two arguments, `state` and `element`. Using existing properties from the element as well as the `notify` config for properties, elements can react from both Polymer and Redux state changes.
+`mapStateToProps` accepts two arguments, `state` and `element`. Using existing properties from the element with `notify` enabled, elements can react from both Polymer and Redux state changes.
 
 ```javascript
 class AcmeUser extends ReduxMixin(ParentElement) {
@@ -153,26 +153,188 @@ class AcmeUser extends ReduxMixin(ParentElement) {
 }
 ```
 
-Use this feature with caution. Notifying properties that have Redux bindings associated with them can cause infinite loops. Imagine an element that has an object as a properties, Redux will return
+Use this feature with caution. Notifying properties that have Redux bindings associated with them can cause a double updates.
+
+#### Selectors
+
+Using selector libraries like [Reselect](https://github.com/reduxjs/reselect) can help with performance when mapping state to an element.
 
 ```javascript
-class AcmeBad extends ReduxMixin(ParentElement) {
-    static get properties() {
-        return {
-            user: {
-                type: Object,
-                notify: true
-            }
-        };
-    }
+import { createSelector } from 'reselect';
 
+const currentUserId = state => state.session.userId;
+const userObjects = state => state.data.users;
+
+const getCurrentUser = createSelector(
+    [currentUserId, userObjects],
+    (id, users) => users[id]
+);
+
+class AcmeUser extends ReduxMixin(ParentElement) {
     static mapStateToProps(state, element) {
         return {
-            user: state.users[element.userId]
+            user: getCurrentUser(state)
         };
     }
 }
 ```
+
+### Dispatching Actions
+
+Along with binding properties elements can also dispatch actions to the Redux store. Elements can implement `static mapDispatchToEvents(dispatch, element)` which allows custom events to dispatch actions.
+
+```javascript
+class AcmeTodo extends ReduxMixin(PolymerElement) {
+    static get template() {
+        return html`
+            <div>
+                <input type="checkbox" on-change="handleDone" checked$="[[done]]" />
+                <span>[[task]]</span>
+            </div>
+        `;
+    }
+    static get properties() {
+        return {
+            task: {
+                type: String,
+                readOnly: true
+            },
+            done: {
+                type: Boolean,
+                readOnly: true
+            }
+        };
+    }
+
+    static mapStateToProps(state) {
+        return {
+            task: state.task,
+            done: state.done
+        };
+    }
+
+    static mapDispatchToEvents(dispatch, element) {
+        return {
+            updateTodo: event => dispatch({
+                type: 'UPDATE_TODO',
+                done: event.detail
+            });
+        };
+    }
+
+    handleDone(event) {
+        this.dispatchEvent(
+            new CustomEvent('update-todo', {
+                detail: event.target.checked
+            })
+        );
+    }
+}
+```
+
+In the element example above, the returning object from `static mapDispatchToEvents` is used to add event listeners to the element. When the events are fired the corresponding action will be dispatched to the Redux store. This may seem like it's just retargeting an event but it introduces [_Connected_ elements](#connected-elements).
+
+The object keys will become the event name but in dash-case. So `updateTodo` will listen for `update-todo` events.
+
+#### Bind Action Creators Helper
+
+Polymer Redux exports a helper function that can bind the dispatch call to each event handler. Using the helper listeners now just need to return the action and Polymer Redux will handle the dispatching for that element.
+
+```javascript
+import { bindActionCreators } from 'polymer-redux';
+
+class AcmeTodo extends ReduxMixin(PolymerElement) {
+    static mapDispatchToEvents(dispatch, element) {
+        return bindActionCreators(
+            {
+                updateTodo: event => ({
+                    type: 'UPDATE_TODO',
+                    done: event.detail
+                })
+            },
+            dispatch
+        );
+    }
+}
+```
+
+#### Manual Dispatch
+
+Elements that extend the Redux mixin inherit the `dispatchAction` method. This method is a proxy for the Redux dispatch function and can be used just like in Redux.
+
+```javascript
+class AcmeTodo extends ReduxMixin(PolymerElement) {
+    handleDone(event) {
+        this.dispatchAction({
+            type: 'UPDATE_TODO',
+            done: event.detail
+        });
+    }
+}
+```
+
+### Connected Elements
+
+So far all the examples have been hybrid elements, meaning that an application is heavily coupled to Polymer Redux. What if the elements are already built or elements need to be decoupled for resusability? This is where connected elements helps.
+
+A connected element holds the binding logic needed for Polymer Redux and nothing more. There is no element logic. This approach lets elements become more reusable and even been bound to another state management library. Use the base element as the parent class for the Redux mixin rather than the standard `PolymerElement`.
+
+```javascript
+// ./elements/acme-todo.js
+export default class AcmeTodo extends PolymerElement {
+    static get template() {
+        return html`
+            <div>
+                <input type="checkbox" on-change="handleDone" checked$="[[done]]" />
+                <span>[[task]]</span>
+            </div>
+        `;
+    }
+    static get properties() {
+        return {
+            task: {
+                type: String,
+                readOnly: true
+            },
+            done: {
+                type: Boolean,
+                readOnly: true
+            }
+        };
+    }
+
+    handleDone(event) {
+        this.dispatchEvent(
+            new CustomEvent('update-todo', {
+                detail: event.target.checked
+            })
+        );
+    }
+}
+
+// ./connected/acme-todo.js
+import AcmeTodo from '../elements/acme-todo';
+
+export default class ConnectedTodo extends PolymerRedux(AcmeTodo) {
+    static mapStateToProps(state) {
+        return {
+            task: state.task,
+            done: state.done
+        };
+    }
+
+    static mapDispatchToEvents(dispatch, element) {
+        return {
+            updateTodo: event => dispatch({
+                type: 'UPDATE_TODO',
+                done: event.detail
+            });
+        };
+    }
+}
+```
+
+Now `AcmeTodo` is not tied to Polymer Redux anymore, it's a standard Polymer element that can be used in any Polymer project. If the project is using Polymer Redux then using `ConnectedTodo` will be the same element but with Redux bindings.
 
 ### Caveats
 
@@ -202,6 +364,14 @@ const reducer = (state, action) => {
 ```
 
 As you can see `state.object` and `state.array` are completely new instances. When using Polymer Redux to bind these properties it will set the new value to the Element's property. The property effects of Polymer is that of a new value and not a splice or sub property change.
+
+## Todo Demo
+
+For a working todo list using Polymer Redux check out the demos of this project.
+
+```
+npm run demo
+```
 
 ## License
 

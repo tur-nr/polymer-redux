@@ -3,6 +3,9 @@
   "version": "2.0.0-beta.0",
   "description": "Polymer bindings for Redux.",
   "main": "polymer-redux.js",
+  "scripts": {
+      "demo": "polymer serve"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tur-nr/polymer-redux.git"

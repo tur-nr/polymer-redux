@@ -84,7 +84,9 @@ function addEventListeners(store, element) {
 			? Definition.mapDispatchToEvents(store.dispatch, element)
 			: null;
 
-	const events = listeners != null ? Object.keys(listeners) : [];
+	const events = (listeners != null ? Object.keys(listeners) : []).map(
+		camelToDashCase
+	);
 	events.forEach(name => element.addEventListener(name, listeners[name]));
 
 	return () =>
@@ -172,6 +174,8 @@ export default createMixin;
  *
  * @param {Object} actionCreators
  * @param {Function} dispatch
+ * @param {Object} [options] Binding options.
+ * @param {Boolean} [options.dashCase] Should event name be dash cased.
  * @return {Object}
  */
 export function bindActionCreators(actionCreators, dispatch) {
@@ -183,7 +187,7 @@ export function bindActionCreators(actionCreators, dispatch) {
 
 	return Object.keys(actionCreators).reduce((actions, name) => {
 		return Object.assign(actions, {
-			[name]: function() {
+			[event]: function() {
 				return dispatch(actionCreators[name].apply(this, arguments));
 			}
 		});

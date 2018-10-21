@@ -31,7 +31,7 @@ export default class TodoInput extends PolymerElement {
 		}
 
 		this.dispatchEvent(
-			new CustomEvent('addTask', {
+			new CustomEvent('add-task', {
 				detail: event.target.value,
 				bubbles: true,
 				composed: true
