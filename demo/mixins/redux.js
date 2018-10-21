@@ -1,4 +1,4 @@
-import { createReduxMixin } from '../../polymer-redux';
+import { createMixin } from '../../polymer-redux';
 import store from '../store';
 
-export default createReduxMixin(store);
+export default createMixin(store);

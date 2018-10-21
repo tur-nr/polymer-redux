@@ -1,14 +1,10 @@
 import './process-env';
+import { camelToDashCase } from '@polymer/polymer/lib/utils/case-map';
 
 /**
- * Is given argument a function.
- *
- * @param {any} fn
- * @return {Boolean}
+ * Polymer private property for registering notify effects on an instance.
  */
-function isFunction(fn) {
-	return typeof fn === 'function';
-}
+const NOTIFY_EFFECTS = '__notifyEffects';
 
 /**
  * Assert given value is a Redux store by ducktyping.
@@ -38,39 +34,88 @@ function assertReduxStore(store) {
 function bindToReduxStore(store, element, registry) {
 	const Definition = element.constructor;
 
-	const updateProperties = state => {
-		if (isFunction(Definition.mapStateToProps)) {
-			const properties = Definition.mapStateToProps(state, element);
-			element.setProperties(properties, true);
+	const updateProperties = () => {
+		if (typeof Definition.mapStateToProps === 'function') {
+			const properties = Definition.mapStateToProps(
+				store.getState(),
+				element
+			);
+
+			if (properties) {
+				element.setProperties(properties, true);
+			}
 		}
 	};
 
 	const unsubscribe = store.subscribe(() => {
-		const state = store.getState();
-		updateProperties(state);
+		updateProperties();
 
 		element.dispatchEvent(
 			new CustomEvent('state-changed', {
-				detail: state
+				detail: store.getState()
 			})
 		);
 	});
 
-	const listeners = isFunction(Definition.mapDispatchToEvents)
-		? Definition.mapDispatchToEvents(store.dispatch, element)
-		: null;
-	const events = listeners != null ? Object.keys(listeners) : [];
-
-	events.forEach(name => element.addEventListener(name, listeners[name]));
+	const removeListeners = addEventListeners(store, element);
+	const removeEffects = addEffectListeners(store, element, updateProperties);
 
 	registry.set(element, () => {
 		unsubscribe();
+		removeListeners();
+		removeEffects();
+	});
+
+	updateProperties();
+}
+
+/**
+ * Adds all `mapDispatchToEvents` event listeners on an element.
+ *
+ * @param {Object} store Redux store.
+ * @param {HTMLElement} element Element instance.
+ * @return {Function} A callback that will remove all listeners from instance.
+ */
+function addEventListeners(store, element) {
+	const Definition = element.constructor;
+
+	const listeners =
+		typeof Definition.mapDispatchToEvents === 'function'
+			? Definition.mapDispatchToEvents(store.dispatch, element)
+			: null;
+
+	const events = listeners != null ? Object.keys(listeners) : [];
+	events.forEach(name => element.addEventListener(name, listeners[name]));
+
+	return () =>
 		events.forEach(name =>
 			element.removeEventListener(name, listeners[name])
 		);
-	});
+}
 
-	updateProperties(store.getState());
+/**
+ * Adds event listeners for element effects to update from Redux store.
+ *
+ * @param {Object} store Redux store.
+ * @param {HTMLElement} element Element instance.
+ * @param {Function} update Callback to update element properties.
+ * @return {Function} Callback to remove all effect listeners.
+ */
+function addEffectListeners(store, element, update) {
+	const notifyEffects = element[NOTIFY_EFFECTS];
+
+	const notifications = notifyEffects
+		? Object.keys(notifyEffects).map(
+				name => `${camelToDashCase(name)}-changed`
+		  )
+		: [];
+
+	notifications.forEach(name => element.addEventListener(name, update));
+
+	return () =>
+		notifications.forEach(name =>
+			element.removeEventListener(name, update)
+		);
 }
 
 /**
@@ -93,7 +138,7 @@ function releaseFromReduxStore(element, registry) {
  * @param {Object} store Redux store instance.
  * @return {Class}
  */
-export function createReduxMixin(store) {
+export function createMixin(store) {
 	assertReduxStore(store);
 
 	const registry = new Map();
@@ -120,7 +165,7 @@ export function createReduxMixin(store) {
 		};
 }
 
-export default createReduxMixin;
+export default createMixin;
 
 /**
  * Binds a list of action creators to a dispatch function.
@@ -132,7 +177,7 @@ export default createReduxMixin;
 export function bindActionCreators(actionCreators, dispatch) {
 	if (!actionCreators) {
 		throw new TypeError(
-			'PolymerRedux: Expecting "actionCreators" to be an enumerable.'
+			'Polymer Redux: Expecting "actionCreators" to be an enumerable.'
 		);
 	}
 
