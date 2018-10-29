@@ -1,0 +1,26 @@
+{
+    "suites": [
+        "test"
+    ],
+    "verbose": true,
+    "persistent": false,
+    "plugins": {
+        "local": {
+            "browserOptions": {
+                "chrome": [
+                    "headless",
+                    "disable-gpu",
+                    "no-sandbox",
+                    "disable-dev-shm-usage"
+                ],
+                "firefox": [
+                    "-headless"
+                ]
+            },
+            "browsers": [
+                "chrome",
+                "firefox"
+            ]
+        }
+    }
+}
