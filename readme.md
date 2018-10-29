@@ -12,6 +12,10 @@ libraries together allows developers to create powerful and complex
 applications faster and simpler. This approach allows the components you build
 with Polymer to be more focused on functionality than the applications state.
 
+## Polymer 3
+
+Polymer 3 is currently under beta release, checkout: https://github.com/tur-nr/polymer-redux/tree/dev/v2.x
+
 ## Installation
 
 ```bash
