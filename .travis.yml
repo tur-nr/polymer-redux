@@ -4,24 +4,27 @@ sudo: true
 
 language: node_js
 
+env:
+- SELENIUM_OVERRIDES_CONFIG=$TRAVIS_BUILD_DIR/package.json
+
 node_js: stable
 
 addons:
-  firefox: latest
-  apt:
-    sources:
-      - google-chrome
-    packages:
-      - google-chrome-stable
+    firefox: latest
+    apt:
+        sources:
+        - google-chrome
+        packages:
+        - google-chrome-stable
 
 cache:
-  yarn: true
+    yarn: false
 
 before_script:
-  - bower install
+# fix wct-local bug => read config from env var
+- sed -i.bak "s/'..\/package.json'/process.env.SELENIUM_OVERRIDES_CONFIG/g" node_modules/wct-local/lib/selenium.js
+# check the patched js
+- cat node_modules/wct-local/lib/selenium.js
 
 script:
-  - xvfb-run npm test
-
-after_script:
-  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+- npx polymer test --verbose

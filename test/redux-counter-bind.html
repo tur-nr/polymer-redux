@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>polymer-redux demo</title>
+
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../node_modules/wct-browser-legacy/browser.js"></script>
+
+  <script type="module">
+    import './redux-counter';
+  </script>
+
+
+</head>
+
+<body>
+  <test-fixture id="bind">
+    <template>
+      <redux-counter-bind></redux-counter-bind>
+    </template>
+  </test-fixture>
+
+  <script type="module">
+    suite('redux-counter-bind tests', function () {
+      let el;
+      setup(function () {
+        el = fixture('bind');
+        // Make tests wait until element is rendered.
+        return el.updateComplete;
+      });
+
+      test('initial state', function () {
+        assert.equal(el.count, '0');
+      });
+
+      test('click increment', function () {
+        assert.equal(el.count, '0');
+        const buttons = el.shadowRoot.querySelectorAll('button');
+        buttons[0].click();
+        assert.equal(el.count, '1');
+      });
+
+    });
+  </script>
+
+</body>
+
+</html>
