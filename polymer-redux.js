@@ -84,13 +84,18 @@ function addEventListeners(store, element) {
 			? Definition.mapDispatchToEvents(store.dispatch, element)
 			: null;
 
-	const events = (listeners != null ? Object.keys(listeners) : []).map((name) => {
-		return {
-			event: camelToDashCase(name),
-			handler: listeners[name]
+	const events = (listeners != null ? Object.keys(listeners) : []).map(
+		name => {
+			return {
+				event: camelToDashCase(name),
+				handler: listeners[name]
+			};
 		}
-	});
-	events.forEach(event => element.addEventListener(event.event, event.handler));
+	);
+
+	events.forEach(event =>
+		element.addEventListener(event.event, event.handler)
+	);
 
 	return () =>
 		events.forEach(event =>
@@ -190,7 +195,7 @@ export function bindActionCreators(actionCreators, dispatch) {
 
 	return Object.keys(actionCreators).reduce((actions, name) => {
 		return Object.assign(actions, {
-			[name]: function () {
+			[name]: function() {
 				return dispatch(actionCreators[name].apply(this, arguments));
 			}
 		});
