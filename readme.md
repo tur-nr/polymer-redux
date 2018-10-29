@@ -193,6 +193,7 @@ class AcmeTodo extends ReduxMixin(PolymerElement) {
             </div>
         `;
     }
+
     static get properties() {
         return {
             task: {
@@ -290,6 +291,7 @@ export default class AcmeTodo extends PolymerElement {
             </div>
         `;
     }
+
     static get properties() {
         return {
             task: {
