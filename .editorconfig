@@ -8,12 +8,5 @@ indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[{*.json,.babelrc,.travis.yml}]
+[*{.json,.yml,.md,.html}]
 indent_style = space
-indent_size = 2
-
-[*.md]
-indent_style = space
-
-[*.html]
-indent_size = 2
