@@ -4,7 +4,8 @@
   "description": "Polymer bindings for Redux.",
   "main": "polymer-redux.js",
   "scripts": {
-    "demo": "polymer serve"
+    "demo": "polymer serve",
+    "test": "polymer test --verbose"
   },
   "repository": {
     "type": "git",

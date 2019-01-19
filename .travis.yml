@@ -27,4 +27,4 @@ before_script:
 - cat node_modules/wct-local/lib/selenium.js
 
 script:
-- npx polymer test --verbose
+- yarn test
