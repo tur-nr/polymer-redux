@@ -140,6 +140,8 @@ function releaseFromReduxStore(element, registry) {
 	if (unsubscribe) {
 		unsubscribe();
 	}
+
+	registry.delete(element);
 }
 
 /**
