@@ -42,7 +42,13 @@ function bindToReduxStore(store, element, registry) {
 			);
 
 			if (properties) {
-				element.setProperties(properties, true);
+				if (element.setProperties) {
+					element.setProperties(properties, true);
+				} else {
+					Object.entries(properties).forEach(
+						([prop, val]) => (element[prop] = val)
+					);
+				}
 			}
 		}
 	};
